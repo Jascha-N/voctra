@@ -52,10 +52,13 @@ fn main() {
     println!("Installing client dependencies.");
     shell_exec("yarn install --check-files", "client");
 
-    println!("Running webpack.");
+    println!("Linting.");
+    shell_exec("yarn run lint", "client");
+
+    println!("Building.");
     if release {
-        shell_exec("yarn run webpack -- -p", "client");
+        shell_exec("yarn run build -- -p", "client");
     } else {
-        shell_exec("yarn run webpack -- -d", "client");
+        shell_exec("yarn run build -- -d", "client");
     }
 }

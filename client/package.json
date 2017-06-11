@@ -29,10 +29,13 @@
         "sass-loader": "^6.0.5",
         "source-map-loader": "^0.2.1",
         "style-loader": "^0.18.2",
+        "tslint": "^5.4.3",
+        "tslint-react": "^3.0.0",
         "typescript": "^2.3.4",
         "webpack": "^2.6.1"
     },
     "scripts": {
-        "build": "webpack"
+        "build": "webpack",
+        "lint": "tslint -p ."
     }
 }
