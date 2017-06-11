@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as Blueprint from "@blueprintjs/core";
 import * as classNames from "classnames";
+import * as ReactI18next from 'react-i18next';
 
 import "./App.scss";
 
@@ -76,17 +77,22 @@ export class Content extends React.Component<{}, {}> {
     }
 }
 
-export class Login extends React.Component<{}, {}> {
+interface LoginProps extends ReactI18next.InjectedTranslateProps {}
+
+@ReactI18next.translate(["translation"])
+export class Login extends React.Component<LoginProps, {}> {
     public render() {
+        const { t } = this.props;
+
         return (
             <form action="" method="post">
                 <label className="pt-label">
-                    <input className="pt-input pt-fill" type="text" placeholder="Gebruikersnaam"/>
+                    <input className="pt-input pt-fill" type="text" placeholder={t("username")}/>
                 </label>
                 <label className="pt-label">
-                    <input className="pt-input pt-fill" type="password" placeholder="Wachtwoord"/>
+                    <input className="pt-input pt-fill" type="password" placeholder={t("password")}/>
                 </label>
-                <input type="submit" className="pt-button pt-intent-primary" value="Inloggen"/>
+                <input type="submit" className="pt-button pt-intent-primary" value={t("login")}/>
             </form>
         );
     }
