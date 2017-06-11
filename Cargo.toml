@@ -1,0 +1,32 @@
+[package]
+name = "voctra"
+version = "0.1.0"
+authors = ["Jascha Neutelings"]
+license = "MIT"
+
+[dependencies]
+bcrypt = "0.1"
+dotenv = "0.10"
+error-chain = "0.10"
+r2d2 = "0.7"
+r2d2-diesel = "0.13"
+rand = "0.3"
+rocket = "0.2"
+rocket_codegen = "0.2"
+rocket_contrib = "0.2"
+serde = "0.9"
+serde_derive = "0.9"
+
+[dependencies.diesel]
+version = "0.13"
+features = ["sqlite"]
+
+[dependencies.diesel_codegen]
+version = "0.13"
+features = ["sqlite"]
+
+[build-dependencies]
+walkdir = "1"
+
+[profile.release]
+lto = true

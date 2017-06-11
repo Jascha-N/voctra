@@ -1,0 +1,6 @@
+/target/
+/web/
+node_modules/
+**/*.rs.bk
+*.sqlite
+Rocket.toml

@@ -1,0 +1,29 @@
+@import "~@blueprintjs/core/dist/variables";
+
+#root {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.ss-root {
+    height: 100%;
+}
+
+.ss-root.pt-dark {
+    background-color: $pt-dark-app-background-color;
+}
+
+.ss-app {
+    margin: auto;
+    max-width: 1000px;
+    min-width: 500px;
+    height: 100%;
+}
+
+.ss-content {
+    padding-top: 50px;
+    height: 100%;
+}
