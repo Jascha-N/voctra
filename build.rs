@@ -56,6 +56,6 @@ fn main() {
     if release {
         shell_exec("yarn run webpack -- -p", "client");
     } else {
-        shell_exec("yarn run webpack", "client");
+        shell_exec("yarn run webpack -- -d", "client");
     }
 }
