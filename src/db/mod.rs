@@ -1,16 +1,52 @@
 use error::*;
-use r2d2::{Config, Pool};
+use r2d2::{Config, Pool, PooledConnection};
 use r2d2_diesel::ConnectionManager;
 
+pub use self::users::User;
+
 mod schema;
-pub mod users;
-pub mod auth;
+mod users;
 
-pub type Connection = ::diesel::sqlite::SqliteConnection;
-pub type ConnectionPool = Pool<ConnectionManager<Connection>>;
 
-pub fn create_connection_pool(database_url: &str) -> Result<ConnectionPool> {
-    let config = Config::default();
-    let manager = ConnectionManager::<Connection>::new(database_url);
-    Pool::new(config, manager).chain_err(|| "Failed to create connection pool")
+
+type RawConnection = ::diesel::sqlite::SqliteConnection;
+
+pub struct Connection {
+    connection: PooledConnection<ConnectionManager<RawConnection>>
+}
+
+impl Connection {
+    fn new(connection: PooledConnection<ConnectionManager<RawConnection>>) -> Connection {
+        Connection { connection }
+    }
+
+    pub fn list_users(&self) -> Result<Vec<User<'static>>> {
+        users::list(&self.connection)
+    }
+
+    pub fn add_user(&self, name: &str, password: &str) -> Result<()> {
+        users::add(&self.connection, name, password)
+    }
+
+    pub fn auth_user(&self, name: &str, password: &str) -> Result<bool> {
+        users::authenticate(&self.connection, name, password)
+    }
+}
+
+pub struct Database {
+    pool: Pool<ConnectionManager<RawConnection>>
+}
+
+impl Database {
+    pub fn new(url: &str) -> Result<Database> {
+        let config = Config::default();
+        let manager = ConnectionManager::<RawConnection>::new(url);
+        let pool = Pool::new(config, manager).chain_err(|| "Failed to create connection pool")?;
+
+        Ok(Database { pool })
+    }
+
+    pub fn connection(&self) -> Result<Connection> {
+        self.pool.get().map(Connection::new).chain_err(|| "No available database connection")
+    }
 }
