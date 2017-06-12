@@ -1,5 +1,9 @@
 @import "~@blueprintjs/core/dist/variables";
 
+:focus {
+    outline: none;
+}
+
 #root {
     position: fixed;
     top: 0;

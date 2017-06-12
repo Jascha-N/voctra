@@ -1,6 +1,5 @@
 import * as classNames from "classnames";
 import * as React from "react";
-import * as ReactI18Next from "react-i18next";
 
 import Content from "./Content";
 import Navigator from "./Navigator";

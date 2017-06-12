@@ -1,10 +1,9 @@
 import * as React from "react";
-import * as ReactI18Next from "react-i18next";
+import * as ReactI18next from "react-i18next";
 
-type ILoginProps = ReactI18Next.InjectedTranslateProps;
+type ILoginProps = ReactI18next.InjectedTranslateProps;
 
-@ReactI18Next.translate(["translation"])
-export default class Login extends React.Component<ILoginProps, {}> {
+class Login extends React.Component<ILoginProps, {}> {
     public render() {
         const { t } = this.props;
 
@@ -21,3 +20,5 @@ export default class Login extends React.Component<ILoginProps, {}> {
         );
     }
 }
+
+export default ReactI18next.translate("common")(Login);

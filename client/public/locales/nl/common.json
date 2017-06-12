@@ -1,5 +1,6 @@
 {
     "username": "Gebruikersnaam",
     "password": "Wachtwoord",
-    "login": "Inloggen"
+    "login": "Inloggen",
+    "not-logged-in": "<niet ingelogd>"
 }
