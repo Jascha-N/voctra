@@ -10,7 +10,7 @@ interface IRootState {
 
 export default class Root extends React.Component<{}, IRootState> {
     public state: IRootState = {
-        darkTheme: true,
+        darkTheme: true
     };
 
     public render() {
@@ -27,7 +27,7 @@ export default class Root extends React.Component<{}, IRootState> {
     private classNames(): string {
         return classNames({
             "pt-dark": this.state.darkTheme,
-            "ss-root": true,
+            "ss-root": true
         });
     }
 

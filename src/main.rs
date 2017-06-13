@@ -6,7 +6,6 @@ extern crate bcrypt;
 #[macro_use] extern crate diesel_codegen;
 extern crate dotenv;
 #[macro_use] extern crate error_chain;
-extern crate flate2;
 extern crate r2d2;
 extern crate r2d2_diesel;
 extern crate rand;
@@ -18,48 +17,18 @@ extern crate uuid;
 
 use db::{Database, User};
 use error::*;
-use flate2::{Compression, FlateReadExt};
 use rocket::State;
-use rocket::http::hyper::header::{ContentEncoding, Encoding};
-use rocket::http::Status;
+use rocket::http::hyper::header::Encoding;
 use rocket::request::Form;
-use rocket::response::{NamedFile, Responder, Response};
+use rocket::response::{NamedFile, Response};
 use rocket_contrib::JSON;
 use std::env;
 use std::path::{Path, PathBuf};
-use std::result::Result as StdResult;
 
 mod db;
 mod error;
 
-pub enum CompressMethod {
-    Deflate,
-    Gzip
-}
 
-struct Compress<T>(T, CompressMethod);
-
-impl<'r, T: Responder<'r>> Responder<'r> for Compress<T> {
-    fn respond(self) -> StdResult<Response<'r>, Status> {
-        let Compress(inner, method) = self;
-
-        inner.respond().map(|mut response| {
-            if let Some(body) = response.take_body() {
-                match method {
-                    CompressMethod::Deflate => {
-                        response.adjoin_header(ContentEncoding(vec![Encoding::Deflate]));
-                        response.set_raw_body(body.map(|body| body.deflate_encode(Compression::Default)));
-                    }
-                    CompressMethod::Gzip => {
-                        response.adjoin_header(ContentEncoding(vec![Encoding::Gzip]));
-                        response.set_raw_body(body.map(|body| body.gz_encode(Compression::Default)));
-                    }
-                }
-            }
-            response
-        })
-    }
-}
 
 #[get("/users")]
 fn list_users(db: State<Database>) -> Result<JSON<Vec<User>>> {
@@ -86,7 +55,7 @@ fn index() -> Option<NamedFile> {
 
 #[get("/<path..>", rank = 2)]
 fn files(path: PathBuf) -> Option<NamedFile> {
-    NamedFile::open(Path::new("web").join(path)).ok()
+    NamedFile::open(Path::new("www").join(path)).ok()
 }
 
 fn run() -> Result<()> {

@@ -1,10 +1,9 @@
+var path = require("path");
 var ExtractTextPlugin = require("extract-text-webpack-plugin");
 module.exports = {
-    entry: {
-        index: "./src/index.tsx"
-    },
+    entry: "./src/index.tsx",
     output: {
-        path: __dirname + "/../web/",
+        path: path.resolve(__dirname, "../www/"),
         filename: "[name].js",
         chunkFilename: "[id].js"
     },
@@ -32,14 +31,6 @@ module.exports = {
             }
         ]
     },
-    // externals: {
-    //     "react": "React",
-    //     "react-dom": "ReactDOM",
-    //     "@blueprintjs/core": "Blueprint.Core",
-    //     "tether": "Tether",
-    //     "classnames": "classNames",
-    //     "react-addons-css-transition-group": "React.addons.CSSTransitionGroup"
-    // },
     plugins: [
         new ExtractTextPlugin("[name].css")
     ]

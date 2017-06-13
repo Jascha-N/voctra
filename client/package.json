@@ -13,6 +13,7 @@
         "@types/react": "^15.0.27",
         "@types/react-dom": "^15.5.0",
         "@types/react-i18next": "^1.7.8",
+        "@types/react-redux": "^4.4.42",
         "classnames": "^2.2.5",
         "i18next": "^8.4.2",
         "i18next-xhr-backend": "^1.4.2",
@@ -20,6 +21,9 @@
         "react-addons-css-transition-group": "^15.5.2",
         "react-dom": "^15.5.4",
         "react-i18next": "^4.1.1",
+        "react-redux": "^5.0.5",
+        "redux": "^3.6.0",
+        "redux-thunk": "^2.2.0",
         "whatwg-fetch": "^2.0.3"
     },
     "devDependencies": {
@@ -33,10 +37,12 @@
         "tslint": "^5.4.3",
         "tslint-react": "^3.0.0",
         "typescript": "^2.3.4",
-        "webpack": "^2.6.1"
+        "webpack": "^2.6.1",
+        "webpack-dev-server": "^2.4.5"
     },
     "scripts": {
         "build": "webpack",
+        "dev-server": "webpack-dev-server -d --content-base static/",
         "lint": "tslint --type-check -p ."
     }
 }

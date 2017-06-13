@@ -30,8 +30,8 @@ fn shell_exec<P: AsRef<Path>>(command: &str, cwd: P) {
 fn main() {
     let release = env::var("PROFILE").unwrap() == "release";
 
-    let src_root = Path::new("client/public");
-    let dst_root = Path::new("web");
+    let src_root = Path::new("client/static");
+    let dst_root = Path::new("www");
 
     let _ = fs::remove_dir_all(dst_root);
 
