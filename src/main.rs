@@ -90,7 +90,7 @@ fn files(path: PathBuf) -> Option<NamedFile> {
 }
 
 fn run() -> Result<()> {
-    dotenv::dotenv().unwrap();
+    let _ = dotenv::dotenv();
     let db_url = env::var("DATABASE_URL").chain_err(|| "DATABASE_URL must be set")?;
     let db = Database::new(&db_url)?;
 
