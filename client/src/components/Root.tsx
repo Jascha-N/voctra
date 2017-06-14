@@ -1,25 +1,23 @@
 import * as classNames from "classnames";
 import * as React from "react";
 
-import Content from "./Content";
+import App from "./App";
 import Navigator from "./Navigator";
 
-interface IRootState {
+interface RootState {
     darkTheme: boolean;
 }
 
-export default class Root extends React.Component<{}, IRootState> {
-    public state: IRootState = {
+export default class Root extends React.Component<{}, RootState> {
+    public state = {
         darkTheme: true
     };
 
     public render() {
         return (
             <div className={this.classNames()}>
-                <div className="ss-app">
-                    <Navigator/>
-                    <Content/>
-                </div>
+                <Navigator/>
+                <App/>
             </div>
         );
     }
@@ -27,7 +25,7 @@ export default class Root extends React.Component<{}, IRootState> {
     private classNames(): string {
         return classNames({
             "pt-dark": this.state.darkTheme,
-            "ss-root": true
+            "vt-root": true
         });
     }
 

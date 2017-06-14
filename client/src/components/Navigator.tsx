@@ -2,29 +2,30 @@ import * as Blueprint from "@blueprintjs/core";
 import * as classNames from "classnames";
 import * as React from "react";
 import * as ReactI18next from "react-i18next";
+import * as ReactRouter from "react-router-dom";
 
 import Login from "./Login";
 
-interface INavigatorProps extends ReactI18next.InjectedTranslateProps {
+interface NavigatorProps extends ReactI18next.InjectedTranslateProps {
     currentUser?: string;
 }
 
-class Navigator extends React.Component<INavigatorProps, {}> {
+class Navigator extends React.Component<NavigatorProps, {}> {
     public render() {
         return (
-            <nav className="ss-navbar pt-navbar">
+            <nav className="vt-navbar pt-navbar pt-fixed-top">
                 <div className="pt-navbar-group pt-align-left">
                     <div className="pt-navbar-heading">voctra</div>
                 </div>
                 <div className="pt-navbar-group pt-align-right">
-                    <span className={this.userClassNames()}>{this.userText()}</span>
-                    <span className="pt-navbar-divider"/>
                     <Blueprint.Popover
                         popoverClassName="pt-popover-content-sizing"
                         position={Blueprint.Position.BOTTOM_RIGHT}
                         isModal={true}
                     >
-                        <Blueprint.Button className="pt-minimal" iconName="user"/>
+                        <Blueprint.Button className="pt-minimal" rightIconName="user">
+                            <span className={this.userClassNames()}>{this.userText()}</span>
+                        </Blueprint.Button>
                         <Login/>
                     </Blueprint.Popover>
                 </div>
@@ -44,4 +45,4 @@ class Navigator extends React.Component<INavigatorProps, {}> {
     }
 }
 
-export default ReactI18next.translate("common")(Navigator);
+export default ReactI18next.translate("common", { wait: true })(Navigator);

@@ -12,23 +12,22 @@
     right: 0;
 }
 
-.ss-root {
+.vt-root {
     height: 100%;
     background-color: $pt-app-background-color;
+    padding-top: $pt-navbar-height;
 }
 
-.ss-root.pt-dark {
+.vt-root.pt-dark {
     background-color: $pt-dark-app-background-color;
 }
 
-.ss-app {
-    margin: auto;
-    max-width: 1000px;
-    min-width: 500px;
+.vt-app {
     height: 100%;
+    overflow: auto;
 }
 
-.ss-content {
-    padding-top: 50px;
-    height: 100%;
+.vt-viewer {
+    margin: auto;
+    width: 50%;
 }

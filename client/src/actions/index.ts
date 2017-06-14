@@ -1,12 +1,12 @@
 import * as ReduxThunk from "redux-thunk";
 
-interface ILoginRequest {
+interface LoginRequest {
     type: "LOGIN_REQUEST";
     userName: string;
     password: string;
 }
 
-export const loginRequest = (userName: string, password: string): ILoginRequest => {
+export const loginRequest = (userName: string, password: string): LoginRequest => {
     return {
         type: "LOGIN_REQUEST",
         userName,
@@ -14,33 +14,33 @@ export const loginRequest = (userName: string, password: string): ILoginRequest 
     };
 };
 
-interface ILoginSuccess {
+interface LoginSuccess {
     type: "LOGIN_SUCCESS";
     userName: string;
 }
 
-export const loginSuccess = (userName: string): ILoginSuccess => {
+export const loginSuccess = (userName: string): LoginSuccess => {
     return {
         type: "LOGIN_SUCCESS",
         userName,
     };
 };
 
-interface ILoginFailure {
+interface LoginFailure {
     type: "LOGIN_FAILURE";
     error: string;
 }
 
-export const loginFailure = (error: string): ILoginFailure => {
+export const loginFailure = (error: string): LoginFailure => {
     return {
         type: "LOGIN_FAILURE",
         error,
     };
 };
 
-type ILogin = ReduxThunk.ThunkAction<void, {}, {}>;
+type Login = ReduxThunk.ThunkAction<void, {}, {}>;
 
-export const login = (userName: string, password: string): ILogin => {
+export const login = (userName: string, password: string): Login => {
     return (dispatch) => {
         dispatch(loginRequest(userName, password));
 
@@ -54,4 +54,4 @@ export const login = (userName: string, password: string): ILogin => {
     };
 };
 
-export type IAction = (ILoginRequest | ILoginSuccess | ILoginFailure);
+export type Action = (LoginRequest | LoginSuccess | LoginFailure);

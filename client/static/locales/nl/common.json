@@ -2,5 +2,12 @@
     "username": "Gebruikersnaam",
     "password": "Wachtwoord",
     "login": "Inloggen",
-    "not-logged-in": "<niet ingelogd>"
+    "not-logged-in": "<niet ingelogd>",
+    "word": "Woord",
+    "translation": "Vertaling",
+    "image": "Afbeelding",
+    "vocabulary-viewer": "Woordenlijst viewer",
+    "select-vocabulary": "Selecteer hier beneden een woordenlijst om te tonen.",
+    "an-error-occurred": "Er is een fout opgetreden",
+    "choose-vocabulary": "Kies een woordenlijst..."
 }

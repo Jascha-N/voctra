@@ -1,22 +1,27 @@
+import * as Blueprint from "@blueprintjs/core";
 import * as React from "react";
 import * as ReactI18next from "react-i18next";
 
-type ILoginProps = ReactI18next.InjectedTranslateProps;
+type LoginProps = ReactI18next.InjectedTranslateProps;
 
-class Login extends React.Component<ILoginProps, {}> {
+class Login extends React.Component<LoginProps, {}> {
     public render() {
         const { t } = this.props;
 
         return (
-            <form action="" method="post">
+            <div>
                 <label className="pt-label">
                     <input className="pt-input pt-fill" type="text" placeholder={t("username")}/>
                 </label>
                 <label className="pt-label">
                     <input className="pt-input pt-fill" type="password" placeholder={t("password")}/>
                 </label>
-                <input type="submit" className="pt-button pt-intent-primary" value={t("login")}/>
-            </form>
+                <Blueprint.Button
+                    className="pt-fill"
+                    intent={Blueprint.Intent.PRIMARY}
+                    text={t("login")}
+                />
+            </div>
         );
     }
 }
