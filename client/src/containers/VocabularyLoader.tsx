@@ -2,7 +2,7 @@ import * as Blueprint from "@blueprintjs/core";
 import * as React from "react";
 import * as ReactRouter from "react-router";
 
-import Vocabulary from "../components/Vocabulary";
+import VocabularyViewer from "../components/VocabularyViewer";
 
 export type VocabularyEntry = [string, string, string];
 
@@ -27,18 +27,12 @@ interface VocabularyLoaderState {
 }
 
 export default class VocabularyLoader extends React.Component<{}, VocabularyLoaderState> {
-    public state: VocabularyLoaderState = {
+    public state = {
         status: Status.NotLoaded
     };
 
     public render() {
-        const selectVocabulary = (event: React.ChangeEvent<HTMLSelectElement>) => {
-            if (event.target.value) {
-                this.fetchVocabulary(event.target.value);
-            }
-        };
-
-        return <Vocabulary {...this.state} selectVocabulary={selectVocabulary}/>;
+        return <VocabularyViewer {...this.state} onSelectVocabulary={this.handleSelectVocabulary}/>;
     }
 
     private fetchVocabulary(name: string) {
@@ -57,5 +51,9 @@ export default class VocabularyLoader extends React.Component<{}, VocabularyLoad
             .then((response) => response.json())
             .then((vocabulary) => this.setState({ status: Status.Loaded, vocabulary }))
             .catch((error) => this.setState({ status: Status.Error, error: error.message }));
+    }
+
+    private readonly handleSelectVocabulary = (name: string) => {
+        this.fetchVocabulary(name);
     }
 }

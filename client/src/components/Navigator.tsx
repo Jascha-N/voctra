@@ -4,17 +4,17 @@ import * as React from "react";
 import * as ReactIntl from "react-intl";
 import * as ReactRouter from "react-router-dom";
 
-import Login from "./Login";
+import LoginManager from "../containers/LoginManager";
 
 interface NavigatorProps {
     currentUser?: string;
     darkTheme: boolean;
-    toggleTheme: () => void;
-    switchLocale: () => void;
+    onToggleTheme: () => void;
+    onSwitchLocale: () => void;
 }
 
 const Navigator = (props: NavigatorProps & ReactIntl.InjectedIntlProps) => {
-    const { intl, currentUser, darkTheme, toggleTheme, switchLocale } = props;
+    const { intl, currentUser, darkTheme, onToggleTheme, onSwitchLocale } = props;
 
     const userText = currentUser ? currentUser : intl.formatMessage({ id: "not-logged-in" });
     const userClassNames = classNames({
@@ -37,10 +37,10 @@ const Navigator = (props: NavigatorProps & ReactIntl.InjectedIntlProps) => {
                     <Blueprint.Button className="pt-minimal" rightIconName="user">
                         <span className={userClassNames}>{userText}</span>
                     </Blueprint.Button>
-                    <Login/>
+                    <LoginManager/>
                 </Blueprint.Popover>
-                <Blueprint.Button className="pt-minimal" iconName={themeIcon} onClick={toggleTheme}/>
-                <Blueprint.Button className="pt-minimal" iconName="translate" onClick={switchLocale}/>
+                <Blueprint.Button className="pt-minimal" iconName={themeIcon} onClick={onToggleTheme}/>
+                <Blueprint.Button className="pt-minimal" iconName="translate" onClick={onSwitchLocale}/>
             </div>
         </nav>
     );

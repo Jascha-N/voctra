@@ -23,7 +23,7 @@ interface RootState {
 }
 
 export default class Root extends React.Component<{}, RootState> {
-    public state: RootState = {
+    public state = {
         darkTheme: true,
         locale: "en"
     };
@@ -36,21 +36,25 @@ export default class Root extends React.Component<{}, RootState> {
             "vt-root": true
         });
 
-        const toggleTheme = () => {
-            this.setState((state) => ({ darkTheme: !state.darkTheme }));
-        };
-
-        const switchLocale = () => {
-            this.setState((state) => ({...state, locale: state.locale === "en" ? "nl" : "en"}));
-        };
-
         return (
             <ReactIntl.IntlProvider locale={locale} key={locale} messages={MESSAGES[locale]}>
                 <div className={classes}>
-                    <Navigator darkTheme={this.state.darkTheme} toggleTheme={toggleTheme} switchLocale={switchLocale}/>
+                    <Navigator
+                        darkTheme={this.state.darkTheme}
+                        onToggleTheme={this.handleToggleTheme}
+                        onSwitchLocale={this.handleSwitchLocale}
+                    />
                     <App/>
                 </div>
             </ReactIntl.IntlProvider>
         );
+    }
+
+    private readonly handleToggleTheme = () => {
+        this.setState((state) => ({ darkTheme: !state.darkTheme }));
+    }
+
+    private readonly handleSwitchLocale = () => {
+        this.setState((state) => ({...state, locale: state.locale === "en" ? "nl" : "en"}));
     }
 }
