@@ -4,16 +4,12 @@
     outline: none;
 }
 
-#root {
+.vt-root {
     position: fixed;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
-}
-
-.vt-root {
-    height: 100%;
     background-color: $pt-app-background-color;
     padding-top: $pt-navbar-height;
 }

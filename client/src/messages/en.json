@@ -9,5 +9,9 @@
     "vocabulary-viewer": "Vocabulary viewer",
     "select-vocabulary": "Select a vocabulary to show from below.",
     "an-error-occurred": "An error occurred",
-    "choose-vocabulary": "Choose a vocabulary..."
+    "choose-vocabulary": "Choose a vocabulary...",
+
+    "lang.en": "English",
+    "lang.lt": "Lithuanian",
+    "lang.nl": "Dutch"
 }

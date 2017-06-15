@@ -1,20 +1,22 @@
 import * as Blueprint from "@blueprintjs/core";
 import * as classNames from "classnames";
 import * as React from "react";
-import * as ReactI18next from "react-i18next";
+import * as ReactIntl from "react-intl";
 import * as ReactRouter from "react-router-dom";
 
 import Login from "./Login";
 
-interface NavigatorProps extends ReactI18next.InjectedTranslateProps {
+interface NavigatorProps {
     currentUser?: string;
     darkTheme: boolean;
     toggleTheme: () => void;
+    switchLocale: () => void;
 }
 
-const Navigator = ({ t, currentUser, darkTheme, toggleTheme }: NavigatorProps) => {
-    const userText = currentUser ? currentUser : t("not-logged-in");
+const Navigator = (props: NavigatorProps & ReactIntl.InjectedIntlProps) => {
+    const { intl, currentUser, darkTheme, toggleTheme, switchLocale } = props;
 
+    const userText = currentUser ? currentUser : intl.formatMessage({ id: "not-logged-in" });
     const userClassNames = classNames({
         "pt-text-muted": !currentUser,
     });
@@ -38,9 +40,10 @@ const Navigator = ({ t, currentUser, darkTheme, toggleTheme }: NavigatorProps) =
                     <Login/>
                 </Blueprint.Popover>
                 <Blueprint.Button className="pt-minimal" iconName={themeIcon} onClick={toggleTheme}/>
+                <Blueprint.Button className="pt-minimal" iconName="translate" onClick={switchLocale}/>
             </div>
         </nav>
     );
 };
 
-export default ReactI18next.translate("common", { wait: true })(Navigator);
+export default ReactIntl.injectIntl(Navigator);

@@ -1,41 +1,56 @@
 import * as classNames from "classnames";
 import * as React from "react";
+import * as ReactIntl from "react-intl";
 
 import App from "../components/App";
 import Navigator from "../components/Navigator";
 
-const languages = ["nl", "en"];
+import * as messagesEn from "../messages/en.json";
+import * as messagesNl from "../messages/nl.json";
+
+interface Messages {
+    [locale: string]: any;
+}
+
+const MESSAGES: Messages = {
+    nl: messagesNl,
+    en: messagesEn
+};
 
 interface RootState {
     darkTheme: boolean;
-    langId: number;
+    locale: string;
 }
 
 export default class Root extends React.Component<{}, RootState> {
     public state: RootState = {
         darkTheme: true,
-        langId: 0
+        locale: "en"
     };
 
     public render() {
+        const { locale, darkTheme } = this.state;
+
         const classes = classNames({
-            "pt-dark": this.state.darkTheme,
+            "pt-dark": darkTheme,
             "vt-root": true
         });
 
         const toggleTheme = () => {
-            this.setState(({darkTheme}) => ({ darkTheme: !darkTheme }));
+            this.setState((state) => ({ darkTheme: !state.darkTheme }));
         };
 
-        const switchLang = () => {
-            this.setState(({langId}) => ({ langId: (langId + 1) % languages.length }));
+        const switchLocale = () => {
+            this.setState((state) => ({...state, locale: state.locale === "en" ? "nl" : "en"}));
         };
 
         return (
-            <div className={classes}>
-                <Navigator darkTheme={this.state.darkTheme} toggleTheme={toggleTheme}/>
-                <App/>
-            </div>
+            <ReactIntl.IntlProvider locale={locale} key={locale} messages={MESSAGES[locale]}>
+                <div className={classes}>
+                    <Navigator darkTheme={this.state.darkTheme} toggleTheme={toggleTheme} switchLocale={switchLocale}/>
+                    <App/>
+                </div>
+            </ReactIntl.IntlProvider>
         );
     }
 }

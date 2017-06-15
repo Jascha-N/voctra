@@ -1,11 +1,11 @@
 import * as Blueprint from "@blueprintjs/core";
 import * as React from "react";
-import * as ReactI18next from "react-i18next";
+import * as ReactIntl from "react-intl";
 import * as ReactRouter from "react-router";
 
 import { Status, VocabularyJson } from "../containers/VocabularyLoader";
 
-interface VocabularyProps extends ReactI18next.InjectedTranslateProps {
+interface VocabularyProps {
     status: Status;
     path?: string;
     error?: string;
@@ -13,42 +13,51 @@ interface VocabularyProps extends ReactI18next.InjectedTranslateProps {
     selectVocabulary: (event: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
-const Vocabulary = (props: VocabularyProps) => {
-    const { t } = props;
-    const { status, path, error, vocabulary, selectVocabulary } = props;
+const Vocabulary = (props: VocabularyProps & ReactIntl.InjectedIntlProps) => {
+    const { intl, status, path, error, vocabulary, selectVocabulary } = props;
+
+    const selectDefault = intl.formatMessage({ id: "choose-vocabulary" });
 
     const vocabularySelect = (
         <div className="pt-select">
             <select defaultValue="" onChange={selectVocabulary}>
-                <option value="" disabled={true} hidden={true}>{t("choose-vocabulary")}</option>
-                <option value="basic">Basic</option>
+                <option value="" disabled={true} hidden={true}>{selectDefault}</option>
+                <option value="example">Example</option>
                 <option value="nope">Does not exist!</option>
             </select>
         </div>
     );
 
     switch (status) {
-        case Status.Loading:
+        case Status.Loading: {
             return <Blueprint.NonIdealState visual={<Blueprint.Spinner/>}/>;
-        case Status.NotLoaded:
+        }
+        case Status.NotLoaded: {
+            const title = intl.formatMessage({id: "vocabulary-viewer"});
+            const description = intl.formatMessage({id: "select-vocabulary"});
+
             return (
                 <Blueprint.NonIdealState
                     visual="book"
-                    title={t("vocabulary-viewer")}
-                    description={t("select-vocabulary")}
+                    title={title}
+                    description={description}
                     action={vocabularySelect}
                 />
             );
-        case Status.Error:
+        }
+        case Status.Error: {
+            const title = intl.formatMessage({id: "an-error-occurred"});
+
             return (
                 <Blueprint.NonIdealState
                     visual="error"
-                    title={t("an-error-occurred")}
+                    title={title}
                     description={error}
                     action={vocabularySelect}
                 />
             );
-        case Status.Loaded:
+        }
+        case Status.Loaded: {
             const { sourceLang, destLang, entries } = vocabulary;
 
             const content = entries.map(([word, translation, image], index) => {
@@ -63,20 +72,25 @@ const Vocabulary = (props: VocabularyProps) => {
                 );
             });
 
+            const sourceLangText = intl.formatMessage({ id: `lang.${sourceLang}`});
+            const destLangText = intl.formatMessage({ id: `lang.${destLang}`});
+
             return (
                 <table className="vt-viewer pt-table pt-striped">
                     <thead>
                         <tr>
                             <th>
-                                {t("word")}&nbsp;
-                                <span className="pt-text-muted">({t(`lang:${sourceLang}`)})</span>
+                                <ReactIntl.FormattedMessage id="word"/>
+                                {" "}
+                                <span className="pt-text-muted">({sourceLangText})</span>
                             </th>
                             <th>
-                                {t("translation")}&nbsp;
-                                <span className="pt-text-muted">({t(`lang:${destLang}`)})</span>
+                                <ReactIntl.FormattedMessage id="translation"/>
+                                {" "}
+                                <span className="pt-text-muted">({destLangText})</span>
                             </th>
                             <th>
-                                {t("image")}
+                                <ReactIntl.FormattedMessage id="image"/>
                             </th>
                         </tr>
                     </thead>
@@ -85,7 +99,8 @@ const Vocabulary = (props: VocabularyProps) => {
                     </tbody>
                 </table>
             );
+        }
     }
 };
 
-export default ReactI18next.translate(["common", "lang"], { wait: true })(Vocabulary);
+export default ReactIntl.injectIntl(Vocabulary);

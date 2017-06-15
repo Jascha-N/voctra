@@ -3,9 +3,8 @@ var ExtractTextPlugin = require("extract-text-webpack-plugin");
 module.exports = {
     entry: "./src/index.tsx",
     output: {
-        path: path.resolve(__dirname, "../www/"),
-        filename: "[name].js",
-        chunkFilename: "[id].js"
+        path: path.join(__dirname, "../www/"),
+        filename: "[name].js"
     },
     devtool: "source-map",
     resolve: {

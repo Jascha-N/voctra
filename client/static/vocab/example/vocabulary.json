@@ -1,7 +1,8 @@
 {
-    "name": "Simple",
-    "sourceLang": "Lithuanian",
-    "destLang": "Dutch",
+    "name": "Example",
+    "description": "An example vocabulary.",
+    "sourceLang": "lt",
+    "destLang": "nl",
     "entries": [
         ["daina", "lied", "images/room1.jpg"],
         ["kede", "stoel", "images/room1.jpg"],

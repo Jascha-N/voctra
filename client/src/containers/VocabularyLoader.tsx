@@ -1,6 +1,5 @@
 import * as Blueprint from "@blueprintjs/core";
 import * as React from "react";
-import * as ReactI18next from "react-i18next";
 import * as ReactRouter from "react-router";
 
 import Vocabulary from "../components/Vocabulary";

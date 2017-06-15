@@ -9,5 +9,9 @@
     "vocabulary-viewer": "Woordenlijst viewer",
     "select-vocabulary": "Selecteer hier beneden een woordenlijst om te tonen.",
     "an-error-occurred": "Er is een fout opgetreden",
-    "choose-vocabulary": "Kies een woordenlijst..."
+    "choose-vocabulary": "Kies een woordenlijst...",
+
+    "lang.en": "Engels",
+    "lang.lt": "Litouws",
+    "lang.nl": "Nederlands"
 }
