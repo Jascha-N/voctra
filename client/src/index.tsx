@@ -10,7 +10,7 @@ import * as XHR from "i18next-xhr-backend";
 import * as Redux from "redux";
 import reduxThunk from "redux-thunk";
 
-import Root from "./components/Root";
+import Root from "./containers/Root";
 
 import * as Actions from "./actions";
 import * as Reducers from "./reducers";
