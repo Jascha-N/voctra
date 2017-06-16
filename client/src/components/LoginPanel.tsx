@@ -5,15 +5,30 @@ import * as ReactIntl from "react-intl";
 interface LoginPanelProps {
     userName: string;
     password: string;
-    onChangeUserName: (userName: string) => void;
-    onChangePassword: (password: string) => void;
+
+    onChangeUserName?: (userName: string) => void;
+    onChangePassword?: (password: string) => void;
 }
 
 class LoginPanel extends React.Component<LoginPanelProps & ReactIntl.InjectedIntlProps, {}> {
+    private handlers = {
+        changeUserName: (event: React.ChangeEvent<HTMLInputElement>) => {
+            const { onChangeUserName } = this.props;
+            if (onChangeUserName) {
+                onChangeUserName(event.target.value);
+            }
+        },
+        changePassword: (event: React.ChangeEvent<HTMLInputElement>) => {
+            const { onChangePassword } = this.props;
+            if (onChangePassword) {
+                onChangePassword(event.target.value);
+            }
+        }
+    };
+
     public render() {
         const { userName, password, onChangeUserName, onChangePassword } = this.props;
         const { intl } = this.props;
-
         return (
             <div>
                 <label className="pt-label">
@@ -23,7 +38,7 @@ class LoginPanel extends React.Component<LoginPanelProps & ReactIntl.InjectedInt
                         type="text"
                         placeholder={intl.formatMessage({ id: "username" })}
                         value={userName}
-                        onChange={this.handleChange}
+                        onChange={this.handlers.changeUserName}
                     />
                 </label>
                 <label className="pt-label">
@@ -33,7 +48,7 @@ class LoginPanel extends React.Component<LoginPanelProps & ReactIntl.InjectedInt
                         type="password"
                         placeholder={intl.formatMessage({ id: "password" })}
                         value={password}
-                        onChange={this.handleChange}
+                        onChange={this.handlers.changePassword}
                     />
                 </label>
                 <Blueprint.Button
@@ -43,15 +58,6 @@ class LoginPanel extends React.Component<LoginPanelProps & ReactIntl.InjectedInt
                 />
             </div>
         );
-    }
-
-    private readonly handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const { target } = event;
-        if (target.id === "username") {
-            this.props.onChangeUserName(target.value);
-        } else if (target.id === "password") {
-            this.props.onChangePassword(target.value);
-        }
     }
 }
 

@@ -1,57 +1,41 @@
 import * as ReduxThunk from "redux-thunk";
 
-interface LoginRequest {
-    type: "LOGIN_REQUEST";
-    userName: string;
-    password: string;
+import { fetchJson } from "../util";
+
+export interface LoginRequest {
+    readonly type: "LOGIN_REQUEST";
+    readonly userName: string;
 }
 
-export const loginRequest = (userName: string, password: string): LoginRequest => {
-    return {
-        type: "LOGIN_REQUEST",
-        userName,
-        password,
-    };
-};
+const loginRequest = (userName: string): LoginRequest => ({ type: "LOGIN_REQUEST", userName });
 
-interface LoginSuccess {
-    type: "LOGIN_SUCCESS";
-    userName: string;
+export interface LoginSuccess {
+    readonly type: "LOGIN_SUCCESS";
 }
 
-export const loginSuccess = (userName: string): LoginSuccess => {
-    return {
-        type: "LOGIN_SUCCESS",
-        userName,
-    };
-};
+const loginSuccess = (): LoginSuccess => ({ type: "LOGIN_SUCCESS" });
 
-interface LoginFailure {
-    type: "LOGIN_FAILURE";
-    error: string;
+export interface LoginFailure {
+    readonly type: "LOGIN_FAILURE";
+    readonly error: string;
 }
 
-export const loginFailure = (error: string): LoginFailure => {
-    return {
-        type: "LOGIN_FAILURE",
-        error,
-    };
-};
+const loginFailure = (error: string): LoginFailure => ({ type: "LOGIN_FAILURE", error });
 
-type Login = ReduxThunk.ThunkAction<void, {}, {}>;
+export type Login = ReduxThunk.ThunkAction<void, {}, {}>;
 
 export const login = (userName: string, password: string): Login => {
     return (dispatch) => {
-        dispatch(loginRequest(userName, password));
+        dispatch(loginRequest(userName));
 
         const data = new FormData();
         data.append("name", userName);
         data.append("password", password);
 
-        fetch("/login", { method: "POST", body: data })
-            .then((response) => response.json(), (error) => dispatch(loginFailure(error)))
-            .then((json) => dispatch(loginSuccess(userName)), (error) => dispatch(loginFailure(error)));
+        fetchJson("/login", { method: "POST", body: data })
+            .then((json) => dispatch(loginSuccess()))
+            .catch((error) => dispatch(loginFailure(error)));
     };
 };
 
-export type Action = (LoginRequest | LoginSuccess | LoginFailure);
+export type LoginAction = LoginRequest | LoginSuccess | LoginFailure;

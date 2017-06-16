@@ -1,6 +1,6 @@
 import * as Redux from "redux";
 
-import { Action } from "../actions";
+import * as Actions from "../actions";
 
 enum LoginStatus {
     NotLoggedIn,
@@ -10,29 +10,23 @@ enum LoginStatus {
 }
 
 interface LoginState {
-    userName?: string;
-    error?: string;
-    status: LoginStatus;
+    readonly status: LoginStatus;
+    readonly userName?: string;
+    readonly error?: string;
 }
 
 const initialLoginState: LoginState = {
     status: LoginStatus.NotLoggedIn
 };
 
-const login: Redux.Reducer<LoginState> = (state = initialLoginState, action: Action) => {
+const login = (state: LoginState = initialLoginState, action: Actions.LoginAction): LoginState => {
     switch (action.type) {
         case "LOGIN_REQUEST":
-            return {
-                ...state, status: LoginStatus.LoggingIn
-            };
+            return { ...state, status: LoginStatus.LoggingIn, userName: action.userName };
         case "LOGIN_SUCCESS":
-            return {
-                ...state, status: LoginStatus.LoggedIn, userName: action.userName
-            };
+            return { ...state, status: LoginStatus.LoggedIn };
         case "LOGIN_FAILURE":
-            return {
-                ...state, status: LoginStatus.Error, error: action.error
-            };
+            return { ...state, status: LoginStatus.Error, error: action.error };
     }
 };
 

@@ -3,10 +3,9 @@ import * as React from "react";
 import * as ReactIntl from "react-intl";
 
 import App from "../components/App";
-import Navigator from "../components/Navigator";
 
-import * as messagesEn from "../messages/en.json";
-import * as messagesNl from "../messages/nl.json";
+import * as messagesEn from "../translations/en.json";
+import * as messagesNl from "../translations/nl.json";
 
 interface Messages {
     [locale: string]: any;
@@ -18,43 +17,38 @@ const MESSAGES: Messages = {
 };
 
 interface RootState {
+    language: string;
     darkTheme: boolean;
-    locale: string;
 }
 
-export default class Root extends React.Component<{}, RootState> {
+class Root extends React.Component<{}, RootState> {
     public state = {
-        darkTheme: true,
-        locale: "en"
+        language: "en",
+        darkTheme: true
+    };
+
+    private handlers = {
+        toggleTheme: () => {
+            this.setState((state) => ({ darkTheme: !state.darkTheme }));
+        },
+        switchLanguage: () => {
+            this.setState((state) => ({ ...state, language: state.language === "en" ? "nl" : "en" }));
+        }
     };
 
     public render() {
-        const { locale, darkTheme } = this.state;
-
-        const classes = classNames({
-            "pt-dark": darkTheme,
-            "vt-root": true
-        });
-
+        const { language, darkTheme } = this.state;
         return (
-            <ReactIntl.IntlProvider locale={locale} key={locale} messages={MESSAGES[locale]}>
-                <div className={classes}>
-                    <Navigator
-                        darkTheme={this.state.darkTheme}
-                        onToggleTheme={this.handleToggleTheme}
-                        onSwitchLocale={this.handleSwitchLocale}
-                    />
-                    <App/>
-                </div>
+            <ReactIntl.IntlProvider locale={language} messages={MESSAGES[language]}>
+                <App
+                    language={language}
+                    darkTheme={darkTheme}
+                    onSwitchLanguage={this.handlers.switchLanguage}
+                    onToggleTheme={this.handlers.toggleTheme}
+                />
             </ReactIntl.IntlProvider>
         );
     }
-
-    private readonly handleToggleTheme = () => {
-        this.setState((state) => ({ darkTheme: !state.darkTheme }));
-    }
-
-    private readonly handleSwitchLocale = () => {
-        this.setState((state) => ({...state, locale: state.locale === "en" ? "nl" : "en"}));
-    }
 }
+
+export default Root;

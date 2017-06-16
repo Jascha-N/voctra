@@ -4,7 +4,7 @@
     outline: none;
 }
 
-.vt-root {
+.vt-app {
     position: fixed;
     top: 0;
     bottom: 0;
@@ -14,11 +14,11 @@
     padding-top: $pt-navbar-height;
 }
 
-.vt-root.pt-dark {
+.vt-app.pt-dark {
     background-color: $pt-dark-app-background-color;
 }
 
-.vt-app {
+.vt-content {
     height: 100%;
     overflow: auto;
 }

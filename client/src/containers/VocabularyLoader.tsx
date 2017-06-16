@@ -3,6 +3,7 @@ import * as React from "react";
 import * as ReactRouter from "react-router";
 
 import VocabularyViewer from "../components/VocabularyViewer";
+import { fetchJson } from "../util";
 
 export type VocabularyEntry = [string, string, string];
 
@@ -26,34 +27,29 @@ interface VocabularyLoaderState {
     vocabulary?: VocabularyJson;
 }
 
-export default class VocabularyLoader extends React.Component<{}, VocabularyLoaderState> {
+class VocabularyLoader extends React.Component<ReactRouter.RouteComponentProps<{}>, VocabularyLoaderState> {
     public state = {
         status: Status.NotLoaded
     };
 
+    private handlers = {
+        selectVocabulary: (name: string) => {
+            this.fetchVocabulary(name);
+        }
+    };
+
     public render() {
-        return <VocabularyViewer {...this.state} onSelectVocabulary={this.handleSelectVocabulary}/>;
+        return <VocabularyViewer {...this.state} onSelectVocabulary={this.handlers.selectVocabulary}/>;
     }
 
     private fetchVocabulary(name: string) {
         const path = `/vocab/${name}`;
 
         this.setState({ status: Status.Loading, path });
-        fetch(`${path}/vocabulary.json`)
-            .then(
-                (response) => {
-                    if (!response.ok) {
-                        throw Error(`${response.status} ${response.statusText}`);
-                    }
-                    return response;
-                }
-            )
-            .then((response) => response.json())
+        fetchJson(`${path}/vocabulary.json`)
             .then((vocabulary) => this.setState({ status: Status.Loaded, vocabulary }))
             .catch((error) => this.setState({ status: Status.Error, error: error.message }));
     }
-
-    private readonly handleSelectVocabulary = (name: string) => {
-        this.fetchVocabulary(name);
-    }
 }
+
+export default VocabularyLoader;

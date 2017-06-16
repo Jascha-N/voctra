@@ -10,10 +10,20 @@ interface VocabularyViewerProps {
     path?: string;
     error?: string;
     vocabulary?: VocabularyJson;
-    onSelectVocabulary: (name: string) => void;
+
+    onSelectVocabulary?: (name: string) => void;
 }
 
 class VocabularyViewer extends React.Component<VocabularyViewerProps & ReactIntl.InjectedIntlProps, {}> {
+    private handlers = {
+        change: (event: React.ChangeEvent<HTMLSelectElement>) => {
+            const { onSelectVocabulary } = this.props;
+            if (onSelectVocabulary) {
+                onSelectVocabulary(event.target.value);
+            }
+        }
+    };
+
     public render() {
         const { status, path, error, vocabulary } = this.props;
         const { intl } = this.props;
@@ -23,32 +33,32 @@ class VocabularyViewer extends React.Component<VocabularyViewerProps & ReactIntl
                 return <Blueprint.NonIdealState visual={<Blueprint.Spinner/>}/>;
             }
             case Status.NotLoaded: {
-                const title = intl.formatMessage({id: "vocabulary-viewer"});
-                const description = intl.formatMessage({id: "select-vocabulary"});
+                const title = intl.formatMessage({ id: "vocabulary-viewer" });
+                const description = intl.formatMessage({ id: "select-vocabulary" });
 
                 return (
                     <Blueprint.NonIdealState
                         visual="book"
                         title={title}
                         description={description}
-                        action={this.renderVocabularySelect()}
+                        action={this.renderSelect()}
                     />
                 );
             }
             case Status.Error: {
-                const title = intl.formatMessage({id: "an-error-occurred"});
+                const title = intl.formatMessage({ id: "an-error-occurred" });
 
                 return (
                     <Blueprint.NonIdealState
                         visual="error"
                         title={title}
                         description={error}
-                        action={this.renderVocabularySelect()}
+                        action={this.renderSelect()}
                     />
                 );
             }
             case Status.Loaded: {
-                const { sourceLang, destLang, entries } = vocabulary;
+                const { sourceLang, destLang, entries } = vocabulary!;
 
                 const content = entries.map(([word, translation, image], index) => {
                     const imageUrl = image.charAt(0) === "/" ? image : `${path}/${image}`;
@@ -93,24 +103,18 @@ class VocabularyViewer extends React.Component<VocabularyViewerProps & ReactIntl
         }
     }
 
-    private renderVocabularySelect() {
+    private renderSelect() {
         const selectDefault = this.props.intl.formatMessage({ id: "choose-vocabulary" });
 
         return (
             <div className="pt-select">
-                <select defaultValue="" onChange={this.handleChange}>
+                <select defaultValue="" onChange={this.handlers.change}>
                     <option value="" disabled={true} hidden={true}>{selectDefault}</option>
                     <option value="example">Example</option>
                     <option value="nope">Does not exist!</option>
                 </select>
             </div>
         );
-    }
-
-    private readonly handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        if (event.target.value) {
-            this.props.onSelectVocabulary(event.target.value);
-        }
     }
 }
 

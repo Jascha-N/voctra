@@ -1,4 +1,6 @@
 {
+    "theme-changed": "Changed the theme to {theme}.",
+    "language-changed": "Changed the language to {language}.",
     "username": "Username",
     "password": "Password",
     "login": "Log in",
@@ -13,5 +15,8 @@
 
     "lang.en": "English",
     "lang.lt": "Lithuanian",
-    "lang.nl": "Dutch"
+    "lang.nl": "Dutch",
+
+    "theme.light": "light",
+    "theme.dark": "dark"
 }

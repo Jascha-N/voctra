@@ -1,12 +1,20 @@
-var path = require("path");
-var ExtractTextPlugin = require("extract-text-webpack-plugin");
+const path = require("path");
+const ExtractTextPlugin = require("extract-text-webpack-plugin");
+
 module.exports = {
-    entry: "./src/index.tsx",
+    entry: [
+        "./src/index.tsx",
+        "./src/index.scss",
+        "whatwg-fetch"
+    ],
     output: {
-        path: path.join(__dirname, "../www/"),
+        path: path.join(__dirname, "..", "www"),
         filename: "[name].js"
     },
     devtool: "source-map",
+    devServer: {
+        contentBase: "./static"
+    },
     resolve: {
         extensions: [".ts", ".tsx", ".js", ".json"]
     },
@@ -22,12 +30,12 @@ module.exports = {
                     use: ["css-loader", "sass-loader"],
                     fallback: "style-loader"
                 })
-            },
-            {
-                test: /\.js$/,
-                enforce: "pre",
-                loader: "source-map-loader"
             }
+            // {
+            //     test: /\.js$/,
+            //     enforce: "pre",
+            //     loader: "source-map-loader"
+            // }
         ]
     },
     plugins: [

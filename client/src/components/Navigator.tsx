@@ -9,15 +9,16 @@ import LoginManager from "../containers/LoginManager";
 interface NavigatorProps {
     currentUser?: string;
     darkTheme: boolean;
-    onToggleTheme: () => void;
-    onSwitchLocale: () => void;
+
+    onToggleTheme?: () => void;
+    onSwitchLanguage?: () => void;
 }
 
 const Navigator = (props: NavigatorProps & ReactIntl.InjectedIntlProps) => {
-    const { intl, currentUser, darkTheme, onToggleTheme, onSwitchLocale } = props;
+    const { intl, currentUser, darkTheme, onToggleTheme, onSwitchLanguage } = props;
 
     const userText = currentUser ? currentUser : intl.formatMessage({ id: "not-logged-in" });
-    const userClassNames = classNames({
+    const userClassName = classNames({
         "pt-text-muted": !currentUser,
     });
 
@@ -35,12 +36,18 @@ const Navigator = (props: NavigatorProps & ReactIntl.InjectedIntlProps) => {
                     isModal={true}
                 >
                     <Blueprint.Button className="pt-minimal" rightIconName="user">
-                        <span className={userClassNames}>{userText}</span>
+                        <span className={userClassName}>{userText}</span>
                     </Blueprint.Button>
                     <LoginManager/>
                 </Blueprint.Popover>
-                <Blueprint.Button className="pt-minimal" iconName={themeIcon} onClick={onToggleTheme}/>
-                <Blueprint.Button className="pt-minimal" iconName="translate" onClick={onSwitchLocale}/>
+                <ReactRouter.Link
+                    to="/vocabulary"
+                    role="button"
+                    className="pt-button pt-minimal pt-icon-book"
+                    tabIndex={0}
+                />
+                <Blueprint.AnchorButton className="pt-minimal" iconName={themeIcon} onClick={onToggleTheme}/>
+                <Blueprint.AnchorButton className="pt-minimal" iconName="translate" onClick={onSwitchLanguage}/>
             </div>
         </nav>
     );
