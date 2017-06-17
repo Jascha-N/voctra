@@ -30,12 +30,14 @@ module.exports = {
                     use: ["css-loader", "sass-loader"],
                     fallback: "style-loader"
                 })
+            },
+            {
+                test: /\.(ttf|eot|woff)$/,
+                loader: "file-loader",
+                options: {
+                    name: "fonts/[name].[ext]"
+                }
             }
-            // {
-            //     test: /\.js$/,
-            //     enforce: "pre",
-            //     loader: "source-map-loader"
-            // }
         ]
     },
     plugins: [

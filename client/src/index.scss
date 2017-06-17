@@ -1,8 +1,6 @@
+@import "~normalize.css";
+@import "~@blueprintjs/core/dist/blueprint.css";
 @import "~@blueprintjs/core/dist/variables";
-
-:focus {
-    outline: none;
-}
 
 .vt-app {
     position: fixed;
@@ -26,4 +24,27 @@
 .vt-viewer {
     margin: auto;
     width: 50%;
+}
+
+.vt-trainer {
+    //margin: 0 auto;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.vt-trainer-intro {
+    p {
+        text-align: justify;
+        text-justify: distribute;
+    }
+    font-size: 200%;
+    width: 50%;
+    min-width: 400px;
+}
+
+.vt-trainer-continue {
+    float: right;
+    clear: right;
 }

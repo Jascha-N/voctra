@@ -6,6 +6,7 @@ import * as ReactRouter from "react-router-dom";
 
 import VocabularyLoader from "../containers/VocabularyLoader";
 import Navigator from "./Navigator";
+import Trainer from "./Trainer";
 
 interface AppProps {
     language: string;
@@ -63,6 +64,7 @@ class App extends React.Component<AppProps, {}> {
                 />
                 <div className="vt-content">
                     <ReactRouter.Route path="/vocabulary" component={VocabularyLoader}/>
+                    <ReactRouter.Route path="/" exact={true} component={Trainer}/>
                 </div>
             </div>
         );
