@@ -1,0 +1,18 @@
+Source: voctra
+Section: web
+Priority: extra
+Maintainer: Jascha Neutelings <neutelings.jascha@gmail.com>
+Build-Depends: debhelper (>= 9),
+               dh-systemd (>= 1.5),
+               yarn (= 0.21.3-1)
+Standards-Version: 3.9.6
+Vcs-Git: https://github.com/Jascha-N/voctra.git
+Vcs-Browser: https://github.com/Jascha-N/voctra
+
+Package: voctra
+Architecture: any
+Depends: adduser,
+         ${shlibs:Depends},
+         ${misc:Depends}
+Description: web application for learning foreign words
+ voctra (Vocabulary Trainer) is a web application! Woohoo!

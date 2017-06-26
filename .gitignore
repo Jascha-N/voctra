@@ -1,6 +1,8 @@
+.cargo
+.vscode
+.vagrant
 /target/
 /www/
 node_modules/
-**/*.rs.bk
+*.deb
 *.sqlite
-Rocket.toml

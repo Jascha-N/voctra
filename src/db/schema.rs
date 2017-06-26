@@ -1,1 +1,1 @@
-infer_schema!("dotenv:DATABASE_URL");
+infer_schema!("env:DEV_DATABASE_URL");

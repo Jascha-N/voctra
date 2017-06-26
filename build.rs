@@ -1,8 +1,12 @@
+extern crate diesel;
 extern crate walkdir;
 
+use diesel::Connection;
+use diesel::migrations;
+use diesel::sqlite::SqliteConnection;
 use std::env;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use walkdir::WalkDir;
 
@@ -28,7 +32,15 @@ fn shell_exec<P: AsRef<Path>>(command: &str, cwd: P) {
 }
 
 fn main() {
-    let release = env::var("PROFILE").unwrap() == "release";
+    let release = &env::var_os("PROFILE").unwrap() == "release";
+    let out = PathBuf::from(env::var_os("OUT_DIR").unwrap());
+    let temp_db = out.join("temp.sqlite").into_os_string().into_string().unwrap();
+
+    println!("Creating temporary database `{}`.", temp_db);
+    let connection = SqliteConnection::establish(&temp_db)
+                                      .expect("Could not establish database connection");
+    println!("Applying migrations.");
+    migrations::run_pending_migrations(&connection).expect("Could not run migrations");
 
     let src_root = Path::new("client/static");
     let dst_root = Path::new("www");
@@ -61,4 +73,9 @@ fn main() {
     } else {
         shell_exec("yarn run build -- -d", "client");
     }
+
+    println!("Printing cargo metadata.");
+    println!("cargo:rustc-env=DEV_DATABASE_URL={}", temp_db);
+    println!("cargo:rerun-if-changed=client/");
+    println!("cargo:rerun-if-changed=migrations/");
 }

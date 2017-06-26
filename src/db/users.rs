@@ -1,10 +1,10 @@
 use bcrypt;
+use db::Connection;
+use db::schema::users;
 use diesel;
 use diesel::prelude::*;
 use error::*;
 use std::borrow::Cow;
-use super::RawConnection;
-use super::schema::users;
 
 #[derive(Insertable, Queryable, Serialize)]
 #[table_name="users"]
@@ -13,13 +13,13 @@ pub struct User<'a> {
     pub password: Cow<'a, str>
 }
 
-pub fn list(connection: &RawConnection) -> Result<Vec<User<'static>>> {
+pub fn list(connection: &Connection) -> Result<Vec<User<'static>>> {
     use db::schema::users::dsl;
 
     Ok(dsl::users.load::<User>(connection).chain_err(|| "Could not retrieve users")?)
 }
 
-pub fn add(connection: &RawConnection, name: &str, password: &str) -> Result<()> {
+pub fn add(connection: &Connection, name: &str, password: &str) -> Result<()> {
     use db::schema::users;
     use db::schema::users::dsl;
 
@@ -45,8 +45,7 @@ pub fn add(connection: &RawConnection, name: &str, password: &str) -> Result<()>
     Ok(())
 }
 
-pub fn authenticate(connection: &RawConnection, name: &str, password: &str) -> Result<bool> {
-    use db::schema::users;
+pub fn authenticate(connection: &Connection, name: &str, password: &str) -> Result<bool> {
     use db::schema::users::dsl;
 
     let user = dsl::users.filter(dsl::name.eq(name))

@@ -1,0 +1,3 @@
+target/release/voctra usr/sbin/
+debian/conf/voctra.conf etc/voctra/
+www/ /usr/share/voctra/

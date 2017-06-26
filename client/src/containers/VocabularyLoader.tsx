@@ -3,7 +3,7 @@ import * as React from "react";
 import * as ReactRouter from "react-router";
 
 import VocabularyViewer from "../components/VocabularyViewer";
-import { fetchJson } from "../util";
+import { fetchApi } from "../util";
 
 export type VocabularyEntry = [string, string, string];
 
@@ -46,7 +46,7 @@ class VocabularyLoader extends React.Component<ReactRouter.RouteComponentProps<{
         const path = `/vocab/${name}`;
 
         this.setState({ status: Status.Loading, path });
-        fetchJson(`${path}/vocabulary.json`)
+        fetchApi(`${path}/vocabulary.json`)
             .then((vocabulary) => this.setState({ status: Status.Loaded, vocabulary }))
             .catch((error) => this.setState({ status: Status.Error, error: error.message }));
     }

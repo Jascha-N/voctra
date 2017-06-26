@@ -1,6 +1,6 @@
 import * as ReduxThunk from "redux-thunk";
 
-import { fetchJson } from "../util";
+import { fetchApi } from "../util";
 
 export interface LoginRequest {
     readonly type: "LOGIN_REQUEST";
@@ -32,7 +32,7 @@ export const login = (userName: string, password: string): Login => {
         data.append("name", userName);
         data.append("password", password);
 
-        fetchJson("/login", { method: "POST", body: data })
+        fetchApi("/login", { method: "POST", body: data })
             .then((json) => dispatch(loginSuccess()))
             .catch((error) => dispatch(loginFailure(error)));
     };

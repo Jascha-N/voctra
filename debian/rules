@@ -1,0 +1,21 @@
+#!/usr/bin/make -f
+DEBIAN_LDFLAGS := $(shell dpkg-buildflags --get LDFLAGS)
+CARGO_OPTS     := --release
+RUSTFLAGS      := $(foreach FLAG,$(DEBIAN_LDFLAGS),-Clink-arg=$(FLAG))
+export RUSTFLAGS
+
+%:
+	dh $@ --with systemd
+
+override_dh_auto_build:
+	cargo build $(CARGO_OPTS)
+
+override_dh_auto_test:
+	cargo test $(CARGO_OPTS)
+
+override_dh_auto_clean:
+	cargo clean
+	rm -rf www/
+	rm -rf client/node_modules/
+
+override_dh_installinit: ;

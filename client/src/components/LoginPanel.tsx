@@ -8,6 +8,7 @@ interface LoginPanelProps {
 
     onChangeUserName?: (userName: string) => void;
     onChangePassword?: (password: string) => void;
+    onClickLogin?: () => void;
 }
 
 class LoginPanel extends React.Component<LoginPanelProps & ReactIntl.InjectedIntlProps, {}> {
@@ -22,6 +23,12 @@ class LoginPanel extends React.Component<LoginPanelProps & ReactIntl.InjectedInt
             const { onChangePassword } = this.props;
             if (onChangePassword) {
                 onChangePassword(event.target.value);
+            }
+        },
+        clickLogin: (event: React.MouseEvent<HTMLButtonElement>) => {
+            const { onClickLogin } = this.props;
+            if (onClickLogin) {
+                onClickLogin();
             }
         }
     };
@@ -55,6 +62,7 @@ class LoginPanel extends React.Component<LoginPanelProps & ReactIntl.InjectedInt
                     className="pt-fill"
                     intent={Blueprint.Intent.PRIMARY}
                     text={intl.formatMessage({ id: "login" })}
+                    onClick={this.handlers.clickLogin}
                 />
             </div>
         );

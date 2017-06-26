@@ -1,0 +1,12 @@
+[Unit]
+Description=voctra daemon
+After=network.target
+
+[Service]
+Type=forking
+PIDFile=/run/voctra.pid
+ExecStart=/usr/sbin/voctra -c /etc/voctra/voctra.conf start
+ExecStop=/usr/sbin/voctra -c /etc/voctra/voctra.conf stop
+
+[Install]
+WantedBy=multi-user.target
