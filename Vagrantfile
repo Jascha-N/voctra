@@ -5,7 +5,7 @@ end
 Vagrant.configure("2") do |config|
   config.vm.box = "debian/jessie64"
 
-  config.vm.synced_folder ".", "/vagrant", type: "virtualbox"
+  config.vm.synced_folder ".", "/vagrant", type: "virtualbox", mount_options: ["dmode=755,fmode=644"]
 
   config.vm.define "build" do |build|
     build.vm.provider "virtualbox" do |vb|

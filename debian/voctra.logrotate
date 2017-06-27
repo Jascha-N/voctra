@@ -1,0 +1,9 @@
+/var/log/voctra/*.log {
+    weekly
+    missingok
+    rotate 52
+    compress
+    delaycompress
+    notifempty
+    copytruncate
+}

@@ -3,6 +3,6 @@
 .vagrant
 /target/
 /www/
-node_modules/
-*.deb
+/build/out/
+/client/node_modules/
 *.sqlite
