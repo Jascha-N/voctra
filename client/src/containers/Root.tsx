@@ -4,26 +4,26 @@ import * as ReactIntl from "react-intl";
 
 import App from "../components/App";
 
-import * as messagesEn from "../translations/en.json";
-import * as messagesNl from "../translations/nl.json";
+import * as messagesEn from "../translations/en-US.json";
+import * as messagesNl from "../translations/nl-NL.json";
 
 interface Messages {
     [locale: string]: any;
 }
 
-const MESSAGES: Messages = {
-    nl: messagesNl,
-    en: messagesEn
+const TRANSLATIONS: Messages = {
+    "nl-NL": messagesNl,
+    "en-US": messagesEn
 };
 
 interface RootState {
-    language: string;
+    currentLocale: string;
     darkTheme: boolean;
 }
 
 class Root extends React.Component<{}, RootState> {
-    public state = {
-        language: "en",
+    public state: RootState = {
+        currentLocale: "en-US",
         darkTheme: true
     };
 
@@ -31,19 +31,20 @@ class Root extends React.Component<{}, RootState> {
         toggleTheme: () => {
             this.setState((state) => ({ darkTheme: !state.darkTheme }));
         },
-        switchLanguage: () => {
-            this.setState((state) => ({ ...state, language: state.language === "en" ? "nl" : "en" }));
+        changeLocale: (locale: string) => {
+            this.setState({ currentLocale: locale });
         }
     };
 
     public render() {
-        const { language, darkTheme } = this.state;
+        const { currentLocale, darkTheme } = this.state;
         return (
-            <ReactIntl.IntlProvider locale={language} messages={MESSAGES[language]}>
+            <ReactIntl.IntlProvider locale={currentLocale} messages={TRANSLATIONS[currentLocale]}>
                 <App
-                    language={language}
+                    currentLocale={currentLocale}
+                    locales={Object.keys(TRANSLATIONS)}
                     darkTheme={darkTheme}
-                    onSwitchLanguage={this.handlers.switchLanguage}
+                    onChangeLocale={this.handlers.changeLocale}
                     onToggleTheme={this.handlers.toggleTheme}
                 />
             </ReactIntl.IntlProvider>

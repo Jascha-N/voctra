@@ -9,11 +9,12 @@ import Navigator from "./Navigator";
 import Trainer from "./Trainer";
 
 interface AppProps {
-    language: string;
+    currentLocale: string;
+    locales: string[];
     darkTheme: boolean;
 
     onToggleTheme?: () => void;
-    onSwitchLanguage?: () => void;
+    onChangeLocale?: (locale: string) => void;
 }
 
 class App extends React.Component<AppProps, {}> {
@@ -25,13 +26,13 @@ class App extends React.Component<AppProps, {}> {
     };
 
     public componentDidUpdate(prevProps: Readonly<AppProps>) {
-        const { language, darkTheme } = this.props;
-        if (language !== prevProps.language) {
+        const { currentLocale, darkTheme } = this.props;
+        if (currentLocale !== prevProps.currentLocale) {
             this.toaster.show({
                 message: (
                     <ReactIntl.FormattedMessage
                         id="language-changed"
-                        values={{ language: <ReactIntl.FormattedMessage id={`lang.${language}`}/> }}
+                        values={{ language: <ReactIntl.FormattedMessage id={`lang.${currentLocale}`}/> }}
                     />
                 )
             });
@@ -49,20 +50,22 @@ class App extends React.Component<AppProps, {}> {
     }
 
     public render() {
-        const { darkTheme, onToggleTheme, onSwitchLanguage } = this.props;
+        const { currentLocale, locales, darkTheme, onToggleTheme, onChangeLocale } = this.props;
         return (
-            <div className={this.classNameWithTheme("vt-app")}>
+            <div className={this.classNameWithTheme()}>
                 <Blueprint.Toaster
                     className={this.classNameWithTheme()}
                     position={Blueprint.Position.BOTTOM}
                     ref={this.handlers.refToaster}
                 />
                 <Navigator
+                    currentLocale={currentLocale}
+                    locales={locales}
                     darkTheme={darkTheme}
                     onToggleTheme={onToggleTheme}
-                    onSwitchLanguage={onSwitchLanguage}
+                    onChangeLocale={onChangeLocale}
                 />
-                <div className="vt-content">
+                <div className={"vt-app"}>
                     <ReactRouter.Route path="/vocabulary" component={VocabularyLoader}/>
                     <ReactRouter.Route path="/" exact={true} component={Trainer}/>
                 </div>

@@ -13,9 +13,9 @@
     "an-error-occurred": "An error occurred",
     "choose-vocabulary": "Choose a vocabulary...",
 
-    "lang.en": "English",
+    "lang.en-US": "English (United States)",
     "lang.lt": "Lithuanian",
-    "lang.nl": "Dutch",
+    "lang.nl-NL": "Dutch (Netherlands)",
 
     "theme.light": "light",
     "theme.dark": "dark"
