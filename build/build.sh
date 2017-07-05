@@ -3,7 +3,7 @@
 set -xe
 
 # Synchronize files
-rsync -av --exclude='/.git' --filter='dir-merge,- .gitignore' /vagrant/ ~/voctra/
+rsync -av --delete --exclude='/.git' --filter='dir-merge,- .gitignore' /vagrant/ ~/voctra/
 cd ~/voctra
 
 # Fix permissions

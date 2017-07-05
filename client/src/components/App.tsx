@@ -5,6 +5,7 @@ import * as ReactIntl from "react-intl";
 import * as ReactRouter from "react-router-dom";
 
 import VocabularyLoader from "../containers/VocabularyLoader";
+
 import Navigator from "./Navigator";
 import Trainer from "./Trainer";
 
@@ -19,7 +20,7 @@ interface AppProps {
 
 class App extends React.Component<AppProps, {}> {
     private toaster: Blueprint.Toaster;
-    private handlers = {
+    private readonly handlers = {
         refToaster: (ref: Blueprint.Toaster) => {
             this.toaster = ref;
         }

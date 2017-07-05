@@ -1,27 +1,25 @@
 use error::*;
+use log::LogLevelFilter;
+use log4rs::append::console::{ConsoleAppender, Target};
+use log4rs::config::{Appender, Config as Log4RsConfig, Logger, Root};
+use log4rs::encode::pattern::PatternEncoder;
+use log4rs::file::RawConfig;
 use r2d2::config::{Config as R2d2Config};
-use rocket::LoggingLevel;
 use rocket::config::Environment;
 use std::error::Error as StdError;
-use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 use toml;
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Default, Deserialize)]
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
 pub struct Settings {
-    #[serde(with = "EnvironmentDef")]
-    pub environment: Environment,
-
-    #[serde(with = "LoggingLevelDef")]
-    pub logging: LoggingLevel,
-
     pub http: Http,
     pub database: Database,
-    pub daemon: Daemon
+    pub daemon: Daemon,
+    pub logging: Option<RawConfig>
 }
 
 impl Settings {
@@ -31,31 +29,37 @@ impl Settings {
         file.read_to_end(&mut buffer).chain_err(|| "Could not read configuration file")?;
         toml::from_slice(&buffer).chain_err(|| "Could not parse configuration file")
     }
-}
 
-impl Default for Settings {
-    fn default() -> Settings {
-        Settings {
-            environment: Environment::Development,
-            logging: LoggingLevel::Normal,
-            daemon: Daemon::default(),
-            http: Http::default(),
-            database: Database::default()
+    pub fn log4rs(&self) -> Result<Log4RsConfig> {
+        if let Some(ref raw_config) = self.logging {
+            let (appenders, errors) = raw_config.appenders_lossy(&Default::default());
+            if let Some(error) = errors.into_iter().next() {
+                return Err(error).chain_err(|| "Could not parse log appenders");
+            }
+            Log4RsConfig::builder()
+                         .appenders(appenders)
+                         .loggers(raw_config.loggers())
+                         .build(raw_config.root())
+                         .chain_err(|| "Could not create logger configuration")
+        } else {
+            let stderr = ConsoleAppender::builder()
+                                         .target(Target::Stderr)
+                                         .encoder(Box::new(PatternEncoder::new("[{h({l})}][{t}]: {m}{n}")))
+                                         .build();
+            Log4RsConfig::builder()
+                         .appender(Appender::builder().build("stderr", Box::new(stderr)))
+                         .logger(Logger::builder().build("rocket", LogLevelFilter::Off))
+                         .logger(Logger::builder().build("_", LogLevelFilter::Off))
+                         .build(Root::builder().appender("stderr").build(LogLevelFilter::Info))
+                         .chain_err(|| "Could not create default logger configuration")
         }
     }
 }
 
-impl Display for Settings {
-    fn fmt(&self, fmt: &mut Formatter) -> FmtResult {
-        writeln!(fmt, "{}", toml::to_string(self).unwrap())
-    }
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Deserialize)]
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
 pub struct Daemon {
     pub pid_file: PathBuf,
-    pub log_file: Option<PathBuf>,
     pub cwd: Option<PathBuf>,
     pub umask: Option<u32>,
     pub user: Option<String>,
@@ -67,7 +71,6 @@ impl Default for Daemon {
     fn default() -> Daemon {
         Daemon {
             pid_file: PathBuf::from("voctra.pid"),
-            log_file: None,
             cwd: None,
             umask: None,
             user: None,
@@ -77,14 +80,16 @@ impl Default for Daemon {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Deserialize)]
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
 pub struct Http {
     pub address: String,
     pub port: u16,
     pub worker_threads: Option<u16>,
-    pub session_key_file: Option<PathBuf>,
-    pub www_root: PathBuf
+    pub key_file: Option<PathBuf>,
+    pub web_root: PathBuf,
+    #[serde(with = "EnvironmentDef")]
+    pub rocket_env: Environment
 }
 
 impl Default for Http {
@@ -93,13 +98,14 @@ impl Default for Http {
             address: String::from("localhost"),
             port: 8000,
             worker_threads: None,
-            session_key_file: None,
-            www_root: PathBuf::from("www")
+            key_file: None,
+            web_root: PathBuf::from("www"),
+            rocket_env: Environment::Development
         }
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Deserialize)]
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
 pub struct Database {
     pub url: String,
@@ -114,7 +120,7 @@ pub struct Database {
 }
 
 impl Database {
-    pub fn r2d2_config<C, E: StdError>(&self) -> Result<R2d2Config<C, E>> {
+    pub fn r2d2<C, E: StdError>(&self) -> Result<R2d2Config<C, E>> {
         if self.pool_size == 0 {
             bail!("`database.pool-size` cannot be zero");
         }
@@ -156,7 +162,7 @@ impl Default for Database {
             min_idle: None,
             helper_threads: 3,
             test_on_checkout: true,
-            initialization_fail_fast: false,
+            initialization_fail_fast: true,
             idle_timeout: 600,
             max_lifetime: 3600,
             connection_timeout: 30
@@ -171,13 +177,4 @@ enum EnvironmentDef {
     Development,
     Staging,
     Production
-}
-
-#[derive(Deserialize, Serialize)]
-#[allow(dead_code)]
-#[serde(remote = "LoggingLevel", rename_all = "kebab-case")]
-enum LoggingLevelDef {
-    Critical,
-    Normal,
-    Debug
 }

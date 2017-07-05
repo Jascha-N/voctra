@@ -3,25 +3,24 @@ import * as ReactDOM from "react-dom";
 import * as ReactIntl from "react-intl";
 import * as ReactRedux from "react-redux";
 import * as ReactRouter from "react-router-dom";
-
 import * as Redux from "redux";
-import reduxThunk from "redux-thunk";
 
+import * as localeDataEn from "react-intl/locale-data/en";
 import * as localeDataNl from "react-intl/locale-data/nl";
 
 import Root from "./containers/Root";
+import { rootReducer } from "./state";
 
-import * as Reducers from "./reducers";
-
+ReactIntl.addLocaleData(localeDataEn);
 ReactIntl.addLocaleData(localeDataNl);
 
-const store = Redux.createStore(Reducers.root, Redux.applyMiddleware(reduxThunk));
+const store = Redux.createStore(rootReducer);
 
 ReactDOM.render(
-    <ReactRouter.BrowserRouter>
-        {/*<ReactRedux.Provider store={store}>*/}
+    <ReactRedux.Provider store={store}>
+        <ReactRouter.BrowserRouter>
             <Root/>
-        {/*</ReactRedux.Provider>*/}
-    </ReactRouter.BrowserRouter>,
+        </ReactRouter.BrowserRouter>
+    </ReactRedux.Provider>,
     document.getElementById("root")
 );

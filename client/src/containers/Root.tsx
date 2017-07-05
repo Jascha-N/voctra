@@ -1,4 +1,3 @@
-import * as classNames from "classnames";
 import * as React from "react";
 import * as ReactIntl from "react-intl";
 
@@ -7,27 +6,27 @@ import App from "../components/App";
 import * as messagesEn from "../translations/en-US.json";
 import * as messagesNl from "../translations/nl-NL.json";
 
-interface Messages {
+interface Translations {
     [locale: string]: any;
 }
 
-const TRANSLATIONS: Messages = {
-    "nl-NL": messagesNl,
-    "en-US": messagesEn
-};
-
-interface RootState {
+interface State {
     currentLocale: string;
     darkTheme: boolean;
 }
 
-class Root extends React.Component<{}, RootState> {
-    public state: RootState = {
+class Root extends React.Component<{}, State> {
+    private static readonly TRANSLATIONS: Translations = {
+        "nl-NL": messagesNl,
+        "en-US": messagesEn
+    };
+
+    public readonly state: State = {
         currentLocale: "en-US",
         darkTheme: true
     };
 
-    private handlers = {
+    private readonly handlers = {
         toggleTheme: () => {
             this.setState((state) => ({ darkTheme: !state.darkTheme }));
         },
@@ -39,10 +38,14 @@ class Root extends React.Component<{}, RootState> {
     public render() {
         const { currentLocale, darkTheme } = this.state;
         return (
-            <ReactIntl.IntlProvider locale={currentLocale} messages={TRANSLATIONS[currentLocale]}>
+            <ReactIntl.IntlProvider
+                locale={currentLocale}
+                defaultLocale="en-US"
+                messages={Root.TRANSLATIONS[currentLocale]}
+            >
                 <App
                     currentLocale={currentLocale}
-                    locales={Object.keys(TRANSLATIONS)}
+                    locales={Object.keys(Root.TRANSLATIONS)}
                     darkTheme={darkTheme}
                     onChangeLocale={this.handlers.changeLocale}
                     onToggleTheme={this.handlers.toggleTheme}

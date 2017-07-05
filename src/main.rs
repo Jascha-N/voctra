@@ -1,4 +1,6 @@
 #[macro_use] extern crate clap;
+#[macro_use] extern crate log;
+extern crate log4rs;
 #[macro_use] extern crate error_chain;
 extern crate voctra;
 
@@ -8,9 +10,9 @@ extern crate voctra;
 #[cfg(unix)] extern crate nix;
 #[cfg(unix)] extern crate users;
 
-use clap::{App, AppSettings, Arg};
+use clap::{App, AppSettings, Arg, SubCommand};
 use std::path::Path;
-use voctra::Result;
+use voctra::error::*;
 use voctra::settings::Settings;
 
 #[cfg(unix)]
@@ -18,12 +20,11 @@ mod imp {
     use super::*;
 
     use chan_signal::Signal;
-    use clap::{ArgMatches, SubCommand};
+    use clap::ArgMatches;
     use nix::fcntl::{self, FlockArg};
     use nix::sys::stat::{self, Mode};
     use nix::sys::signal;
     use nix::unistd;
-    use voctra::{Error, Result, ResultExt};
     use std::env;
     use std::fs::{self, File, OpenOptions};
     use std::io::{Read, Write};
@@ -79,7 +80,7 @@ mod imp {
         // Fork
         if unistd::fork().chain_err(|| "Could not perform first fork")?.is_parent() {
             mem::drop(pipe_child);
-            // Wait for child process to send sentinel value indicating succesfull initialization
+            // Wait for child process to send sentinel value indicating successful initialization
             pipe_parent.read_exact(&mut [0; 1]).chain_err(|| "Daemon process did not notify starter process")?;
             process::exit(0);
         }
@@ -132,22 +133,15 @@ mod imp {
         // Write PID to file
         pid_file.write_pid(unistd::getpid())?;
 
-        // Redirect STDIN to /dev/null
-        let dev_null = File::open("/dev/null").chain_err(|| "Could not open `/dev/null`")?;
+        // Redirect STDIN, STDOUT and STDERR to /dev/null
+        let dev_null = OpenOptions::new()
+                                   .read(true)
+                                   .write(true)
+                                   .open("/dev/null")
+                                   .chain_err(|| "Could not open `/dev/null`")?;
         unistd::dup2(dev_null.as_raw_fd(), libc::STDIN_FILENO).chain_err(|| "Could not redirect STDIN")?;
-        mem::drop(dev_null);
-
-        // Redirect STDOUT and STDERR if required
-        if let Some(ref log_file_path) = settings.log_file {
-            let log = OpenOptions::new()
-                                  .append(true)
-                                  .create(true)
-                                  .open(log_file_path)
-                                  .chain_err(|| "Could not open log file")?;
-
-            unistd::dup2(log.as_raw_fd(), libc::STDOUT_FILENO).chain_err(|| "Could not redirect STDOUT")?;
-            unistd::dup2(log.as_raw_fd(), libc::STDERR_FILENO).chain_err(|| "Could not redirect STDERR")?;
-        }
+        unistd::dup2(dev_null.as_raw_fd(), libc::STDOUT_FILENO).chain_err(|| "Could not redirect STDOUT")?;
+        unistd::dup2(dev_null.as_raw_fd(), libc::STDERR_FILENO).chain_err(|| "Could not redirect STDOUT")?;
 
         // Notify the parent that the child process is done initializing
         let _ = pipe_child.write(&[0]);
@@ -162,12 +156,12 @@ mod imp {
         let (sdone, rdone) = chan::sync(0);
         Builder::new().name("server".to_string()).spawn(move || {
             sdone.send(voctra::run(settings));
-        }).chain_err(|| "Could not start server thread")?;
+        }).chain_err(|| "Could not start the server thread")?;
 
         let result;
         chan_select! {
             signal.recv() -> signal => {
-                println!("Caught signal: {:?}; stopping daemon", signal.unwrap());
+                info!("Caught signal: {:?}; stopping daemon.", signal.unwrap());
                 result = Ok(());
             },
             rdone.recv() -> thread_result => {
@@ -205,15 +199,15 @@ mod imp {
                                .help("Path of PID file");
 
         app.subcommand(SubCommand::with_name("start")
-               .about("Start daemon")
+               .about("Starts the web application as a daemon process")
                .arg(pid_file_arg.clone()))
            .subcommand(SubCommand::with_name("stop")
-               .about("Stop daemon")
+               .about("Stops the daemon process")
                .arg(pid_file_arg))
            .get_matches()
     }
 
-    pub fn run(mut settings: Settings, args: ArgMatches) -> Result<()> {
+    pub fn run(mut settings: Settings, args: &ArgMatches) -> Result<()> {
         if let Some(matches) = args.subcommand_matches("start") {
             if let Some(pid_file_path) = matches.value_of("PID_FILE") {
                 settings.daemon.pid_file = PathBuf::from(pid_file_path);
@@ -239,7 +233,7 @@ mod imp {
         app.get_matches()
     }
 
-    pub fn run(settings: Settings, _: ArgMatches) -> Result<()> {
+    pub fn run(settings: Settings, _: &ArgMatches) -> Result<()> {
         voctra::run(settings)
     }
 }
@@ -250,21 +244,27 @@ fn run() -> Result<()> {
                   .author(crate_authors!("\n"))
                   .about("voctra web application")
                   .global_setting(AppSettings::VersionlessSubcommands)
+                  .setting(AppSettings::SubcommandRequiredElseHelp)
                   .arg(Arg::with_name("CONFIG")
                       .long("config-file")
                       .short("c")
                       .takes_value(true)
                       .help("Path of configuration file to use"))
-                  .arg(Arg::with_name("print_default_config")
-                      .long("print-default-config")
-                      .help("Print the default configuration"));
+                  .subcommand(SubCommand::with_name("run")
+                      .about("Runs the web application"))
+                  .subcommand(SubCommand::with_name("users")
+                      .about("User management commands")
+                      .setting(AppSettings::SubcommandRequiredElseHelp)
+                      .subcommand(SubCommand::with_name("list")
+                          .about("Lists all users"))
+                      .subcommand(SubCommand::with_name("add")
+                          .about("Adds a user to the database")
+                          .arg(Arg::with_name("USERNAME")
+                              .required(true))
+                          .arg(Arg::with_name("PASSWORD")
+                              .required(true))));
 
     let args = imp::args(app);
-
-    if args.is_present("print_default_config") {
-        print!("{}", Settings::default());
-        return Ok(());
-    }
 
     let settings = if let Some(config_path) = args.value_of("CONFIG") {
         Settings::from_file(Path::new(config_path))?
@@ -272,7 +272,22 @@ fn run() -> Result<()> {
         Settings::default()
     };
 
-    imp::run(settings, args)
+    log4rs::init_config(settings.log4rs()?).chain_err(|| "Could not set up logger")?;
+
+    if let Some(matches) = args.subcommand_matches("users") {
+        if matches.subcommand_matches("list").is_some() {
+            voctra::list_users(settings)
+        } else if let Some(matches) = matches.subcommand_matches("add") {
+            let username = matches.value_of("USERNAME").unwrap();
+            let password = matches.value_of("PASSWORD").unwrap();
+
+            voctra::add_user(settings, username, password)
+        } else {
+            unreachable!()
+        }
+    } else {
+        imp::run(settings, &args)
+    }
 }
 
 quick_main!(run);

@@ -69,13 +69,16 @@ fn main() {
 
     println!("Building.");
     if release {
-        shell_exec("yarn run build -- -p", "client");
+        shell_exec("yarn build -- -p", "client");
     } else {
-        shell_exec("yarn run build -- -d", "client");
+        shell_exec("yarn build -- -d", "client");
     }
 
     println!("Printing cargo metadata.");
     println!("cargo:rustc-env=DEV_DATABASE_URL={}", temp_db);
-    println!("cargo:rerun-if-changed=client/");
-    println!("cargo:rerun-if-changed=migrations/");
+    for entry in WalkDir::new("client").into_iter().chain(WalkDir::new("migrations")) {
+        let entry = entry.unwrap();
+        let path = entry.path();
+        println!("cargo:rerun-if-changed={}", path.to_str().unwrap());
+    }
 }

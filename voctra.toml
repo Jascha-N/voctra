@@ -1,0 +1,44 @@
+[http]
+address = "localhost"
+port = 8000
+# worker-threads = (cpu-count * 2)
+# key-file = (none)
+web-root = "www"
+rocket-env = "development"
+
+[database]
+url = "voctra.sqlite"
+pool-size = 10
+# min-idle = (pool-size)
+helper-threads = 3
+test-on-checkout = true
+initialization-fail-fast = true
+idle-timeout = 600
+max-lifetime = 1800
+connection-timeout = 30
+
+[daemon]
+pid-file = "voctra.pid"
+# cwd = (current)
+# umask = (current)
+# user = (current)
+# group = (current)
+stop-timeout = 5
+
+[logging.appenders.stderr]
+kind = "console"
+target = "stderr"
+
+[logging.appenders.stderr.encoder]
+kind = "pattern"
+pattern = "{d} {h({l})} {t} - {m}{n}"
+
+[logging.root]
+level = "info"
+appenders = ["stderr"]
+
+[logging.loggers.rocket]
+level = "off"
+
+[logging.loggers._]
+level = "off"

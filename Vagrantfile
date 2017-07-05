@@ -25,10 +25,9 @@ Vagrant.configure("2") do |config|
     end
 
     staging.vm.network "forwarded_port", guest: 80, host: 8000, host_ip: "localhost"
-    # staging.vm.network "forwarded_port", guest: 443, host: 443, host_ip: "localhost"
+    staging.vm.network "forwarded_port", guest: 443, host: 8443, host_ip: "localhost"
 
     staging.vm.provision "shell" do |shell|
-      shell.privileged = false
       shell.path = "staging/provision.sh"
     end
   end

@@ -6,7 +6,7 @@ import * as ReactRouter from "react-router-dom";
 
 import LoginManager from "../containers/LoginManager";
 
-interface NavigatorProps {
+type Props = ReactIntl.InjectedIntlProps & {
     currentUser?: string;
     currentLocale: string;
     locales: string[];
@@ -14,30 +14,30 @@ interface NavigatorProps {
 
     onToggleTheme?: () => void;
     onChangeLocale?: (locale: string) => void;
-}
+};
 
 interface Handlers {
     clickLocale: { [locale: string]: () => void };
 }
 
-class Navigator extends React.Component<NavigatorProps & ReactIntl.InjectedIntlProps, {}> {
-    private handlers: Handlers = {
+class Navigator extends React.Component<Props, {}> {
+    private readonly handlers: Handlers = {
         clickLocale: {}
     };
 
-    constructor(props: Readonly<NavigatorProps & ReactIntl.InjectedIntlProps>) {
+    constructor(props: Readonly<Props>) {
         super(props);
         this.updateHandlers(props);
     }
 
-    public componentWillUpdate(nextProps: Readonly<NavigatorProps & ReactIntl.InjectedIntlProps>) {
+    public componentWillUpdate(nextProps: Readonly<Props>) {
         if (this.props.locales !== nextProps.locales) {
             this.updateHandlers(nextProps);
         }
     }
 
     public render() {
-        const { intl, currentUser, currentLocale, locales, darkTheme, onToggleTheme, onChangeLocale } = this.props;
+        const { intl, currentUser, currentLocale, locales, darkTheme, onToggleTheme } = this.props;
 
         const userText = currentUser ? currentUser : intl.formatMessage({ id: "not-logged-in" });
         const userClassName = classNames({
@@ -99,7 +99,7 @@ class Navigator extends React.Component<NavigatorProps & ReactIntl.InjectedIntlP
         );
     }
 
-    private updateHandlers(props: NavigatorProps) {
+    private updateHandlers(props: Props) {
         this.handlers.clickLocale = props.locales.reduce((prev, locale) => ({
             ...prev,
             [locale]: () => {

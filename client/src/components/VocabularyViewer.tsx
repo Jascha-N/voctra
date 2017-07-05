@@ -1,21 +1,20 @@
 import * as Blueprint from "@blueprintjs/core";
 import * as React from "react";
 import * as ReactIntl from "react-intl";
-import * as ReactRouter from "react-router";
 
 import { Status, VocabularyJson } from "../containers/VocabularyLoader";
 
-interface VocabularyViewerProps {
+type Props = ReactIntl.InjectedIntlProps & {
     status: Status;
     path?: string;
     error?: string;
     vocabulary?: VocabularyJson;
 
     onSelectVocabulary?: (name: string) => void;
-}
+};
 
-class VocabularyViewer extends React.Component<VocabularyViewerProps & ReactIntl.InjectedIntlProps, {}> {
-    private handlers = {
+class VocabularyViewer extends React.Component<Props, {}> {
+    private readonly handlers = {
         change: (event: React.ChangeEvent<HTMLSelectElement>) => {
             const { onSelectVocabulary } = this.props;
             if (onSelectVocabulary) {

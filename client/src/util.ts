@@ -1,6 +1,6 @@
 export interface ApiResponse {
     status: string;
-    message: string;
+    message?: string;
     payload?: any;
 }
 
@@ -22,8 +22,8 @@ export class ApiError extends Error {
     }
 }
 
-export const fetchApi = (input: RequestInfo, init?: RequestInit): Promise<(any | undefined)> => {
-    return window.fetch(input, init)
+export const fetchJson = <T extends {}>(input: RequestInfo, init?: RequestInit): Promise<T> => (
+    window.fetch(input, init)
         .then((response) => {
             if (!response.ok) {
                 throw new HttpRequestError(response.status, response.statusText);
@@ -31,10 +31,14 @@ export const fetchApi = (input: RequestInfo, init?: RequestInit): Promise<(any |
             return response;
         })
         .then((response) => response.json())
+);
+
+export const fetchApi = <T extends {}>(input: RequestInfo, init?: RequestInit): Promise<T> => (
+    fetchJson(input, init)
         .then(({ status, message, payload }: ApiResponse) => {
             if (status.substr(0, 6) === "error:") {
-                throw new ApiError(status.substr(status.indexOf(":") + 1), message);
+                throw new ApiError(status.substr(status.indexOf(":") + 1), message!);
             }
             return payload;
-        });
-};
+        })
+);

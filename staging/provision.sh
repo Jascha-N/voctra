@@ -3,10 +3,16 @@
 set -xe
 
 # Install dependencies
-sudo apt-get update
-sudo apt-get install -y rsync nginx-full
+apt-get update
+apt-get install -y rsync nginx-full ssl-cert
 
-sudo rsync -av /vagrant/staging/nginx.conf /etc/nginx/nginx.conf
-sudo systemctl reload nginx
+rsync -av /vagrant/staging/voctra.dev /etc/nginx/sites-available/voctra.dev
+if [ -f /etc/nginx/sites-enabled/default ]; then
+    rm -f /etc/nginx/sites-enabled/default
+fi
+if [ ! -f /etc/nginx/sites-enabled/voctra.dev ]; then
+    ln -s /etc/nginx/sites-available/voctra.dev /etc/nginx/sites-enabled/voctra.dev
+fi
+systemctl reload nginx
 
-sudo dpkg -i /vagrant/build/out/voctra_0.1.0_amd64.deb
+dpkg -i /vagrant/build/out/voctra_0.1.0_amd64.deb

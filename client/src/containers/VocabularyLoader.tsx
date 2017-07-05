@@ -1,9 +1,8 @@
-import * as Blueprint from "@blueprintjs/core";
 import * as React from "react";
 import * as ReactRouter from "react-router";
 
 import VocabularyViewer from "../components/VocabularyViewer";
-import { fetchApi } from "../util";
+import { fetchJson } from "../util";
 
 export type VocabularyEntry = [string, string, string];
 
@@ -20,19 +19,21 @@ export enum Status {
     Error
 }
 
-interface VocabularyLoaderState {
+type Props = ReactRouter.RouteComponentProps<{}>;
+
+interface State {
     status: Status;
     path?: string;
     error?: string;
     vocabulary?: VocabularyJson;
 }
 
-class VocabularyLoader extends React.Component<ReactRouter.RouteComponentProps<{}>, VocabularyLoaderState> {
-    public state = {
+class VocabularyLoader extends React.Component<Props, State> {
+    public readonly state: State = {
         status: Status.NotLoaded
     };
 
-    private handlers = {
+    private readonly handlers = {
         selectVocabulary: (name: string) => {
             this.fetchVocabulary(name);
         }
@@ -46,7 +47,7 @@ class VocabularyLoader extends React.Component<ReactRouter.RouteComponentProps<{
         const path = `/vocab/${name}`;
 
         this.setState({ status: Status.Loading, path });
-        fetchApi(`${path}/vocabulary.json`)
+        fetchJson<VocabularyJson>(`${path}/vocabulary.json`)
             .then((vocabulary) => this.setState({ status: Status.Loaded, vocabulary }))
             .catch((error) => this.setState({ status: Status.Error, error: error.message }));
     }

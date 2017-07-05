@@ -7,12 +7,12 @@ case "$1" in
         adduser --quiet --system --group --no-create-home --home /var/lib/voctra voctra
 
         if [ -z "$2" ]; then
-            log="/var/log/voctra/voctra.log"
-            if [ ! -e "$log" ]; then
-                touch "$log"
-                chmod 640 "$log"
-                chown voctra:adm "$log"
-            fi
+            # log="/var/log/voctra/voctra.log"
+            # if [ ! -e "$log" ]; then
+            #     touch "$log"
+            #     chmod 640 "$log"
+            #     chown voctra:adm "$log"
+            # fi
 
             chown voctra:voctra "/var/lib/voctra"
         fi

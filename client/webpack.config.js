@@ -16,7 +16,7 @@ module.exports = {
         contentBase: "./static"
     },
     resolve: {
-        extensions: [".ts", ".tsx", ".js", ".json"]
+        extensions: [".ts", ".tsx", ".js"],
     },
     module: {
         rules: [

@@ -1,5 +1,5 @@
 use bcrypt;
-use db::Connection;
+use db::{Connection, Database};
 use db::schema::users;
 use diesel;
 use diesel::prelude::*;
@@ -13,49 +13,62 @@ pub struct User<'a> {
     pub password: Cow<'a, str>
 }
 
-pub fn list(connection: &Connection) -> Result<Vec<User<'static>>> {
-    use db::schema::users::dsl;
-
-    Ok(dsl::users.load::<User>(connection).chain_err(|| "Could not retrieve users")?)
+pub trait Users {
+    fn list_users(&self) -> Result<Vec<User<'static>>>;
+    fn add_user(&self, name: &str, password: &str) -> Result<()>;
+    fn auth_user(&self, name: &str, password: &str) -> Result<bool>;
 }
 
-pub fn add(connection: &Connection, name: &str, password: &str) -> Result<()> {
-    use db::schema::users;
-    use db::schema::users::dsl;
+impl<T: Database> Users for T {
+    fn list_users(&self) -> Result<Vec<User<'static>>> {
+        use db::schema::users::dsl;
 
-    let user = dsl::users.filter(dsl::name.eq(name))
-                         .first::<User>(connection)
-                         .optional()
-                         .chain_err(|| "Could not query users")?;
-    if user.is_some() {
-        return Err(ErrorKind::DuplicateUser.into());
+        let connection = self.connection()?;
+        Ok(dsl::users.load::<User>(connection.raw()).chain_err(|| "Could not retrieve users")?)
     }
 
-    let hashed_password = bcrypt::hash(password, bcrypt::DEFAULT_COST).chain_err(|| "Could not hash password")?;
+    fn add_user(&self, name: &str, password: &str) -> Result<()> {
+        use db::schema::users;
+        use db::schema::users::dsl;
 
-    let new_user = User {
-        name: Cow::Borrowed(name),
-        password: Cow::Owned(hashed_password),
-    };
+        let connection = self.connection()?;
 
-    diesel::insert(&new_user).into(users::table)
-           .execute(connection)
-           .chain_err(|| "Could not add new user")?;
+        let user = dsl::users.filter(dsl::name.eq(name))
+                             .first::<User>(connection.raw())
+                             .optional()
+                             .chain_err(|| "Could not query users")?;
+        if user.is_some() {
+            return Err(ErrorKind::UserAlreadyExists(name.to_string()).into());
+        }
 
-    Ok(())
-}
+        let hashed_password = bcrypt::hash(password, bcrypt::DEFAULT_COST).chain_err(|| "Could not hash password")?;
 
-pub fn authenticate(connection: &Connection, name: &str, password: &str) -> Result<bool> {
-    use db::schema::users::dsl;
+        let new_user = User {
+            name: Cow::Borrowed(name),
+            password: Cow::Owned(hashed_password),
+        };
 
-    let user = dsl::users.filter(dsl::name.eq(name))
-                         .first::<User>(connection)
-                         .optional()
-                         .chain_err(|| "Could not query users")?;
+        diesel::insert(&new_user).into(users::table)
+               .execute(connection.raw())
+               .chain_err(|| "Could not add new user")?;
 
-    if let Some(user) = user {
-        bcrypt::verify(password, &user.password).chain_err(|| "Could not verify password")
-    } else {
-        Err(ErrorKind::Authentication.into())
+        Ok(())
+    }
+
+    fn auth_user(&self, name: &str, password: &str) -> Result<bool> {
+        use db::schema::users::dsl;
+
+        let connection = self.connection()?;
+
+        let user = dsl::users.filter(dsl::name.eq(name))
+                             .first::<User>(connection.raw())
+                             .optional()
+                             .chain_err(|| "Could not query users")?;
+
+        if let Some(user) = user {
+            bcrypt::verify(password, &user.password).chain_err(|| "Could not verify password")
+        } else {
+            Err(Error::from(ErrorKind::InvalidCredentials))
+        }
     }
 }

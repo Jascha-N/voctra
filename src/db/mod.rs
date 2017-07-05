@@ -1,57 +1,102 @@
 use error::*;
-use r2d2::{Pool, PooledConnection};
+use r2d2::{ManageConnection, Pool, PooledConnection as R2d2PooledConnection};
 use r2d2_diesel::ConnectionManager;
 use settings::Database as DatabaseSettings;
 use std::io;
 
-pub use self::users::User;
+pub use self::users::Users;
 
-mod schema;
 mod users;
+
+mod schema {
+    infer_schema!("env:DEV_DATABASE_URL");
+}
 
 
 
 embed_migrations!();
 
 #[cfg(feature = "sqlite")]
-type Connection = ::diesel::sqlite::SqliteConnection;
+type RawConnection = ::diesel::sqlite::SqliteConnection;
 
 #[cfg(feature = "postgres")]
-type Connection = ::diesel::pg::PgConnection;
+type RawConnection = ::diesel::pg::PgConnection;
 
 #[cfg(feature = "mysql")]
-type Connection = ::diesel::mysql::MysqlConnection;
+type RawConnection = ::diesel::mysql::MysqlConnection;
 
-pub struct Database {
-    pool: Pool<ConnectionManager<Connection>>
+pub trait Database {
+    type Connection: Connection;
+
+    fn connection(&self) -> Result<Self::Connection>;
 }
 
-impl Database {
-    pub fn new(settings: &DatabaseSettings) -> Result<Database> {
-        let config = settings.r2d2_config()?;
-        let manager = ConnectionManager::<Connection>::new(settings.url.clone());
+pub trait Connection {
+    fn raw(&self) -> &RawConnection;
+}
+
+
+
+pub struct PooledDatabase(Pool<ConnectionManager<RawConnection>>);
+
+impl PooledDatabase {
+    pub fn new(settings: &DatabaseSettings) -> Result<PooledDatabase> {
+        let config = settings.r2d2()?;
+        let manager = ConnectionManager::<RawConnection>::new(settings.url.clone());
+        run_migrations(&manager)?;
         let pool = Pool::new(config, manager).chain_err(|| "Failed to create connection pool")?;
-        let db = Database { pool };
-
-        embedded_migrations::run_with_output(&*db.connection()?, &mut io::stderr())
-            .chain_err(|| "Could not run migrations")?;
-
-        Ok(db)
+        Ok(PooledDatabase(pool))
     }
+}
 
-    fn connection(&self) -> Result<PooledConnection<ConnectionManager<Connection>>> {
-        self.pool.get().chain_err(|| "Could not obtain database connection")
-    }
+impl Database for PooledDatabase {
+    type Connection = PooledConnection;
 
-    pub fn list_users(&self) -> Result<Vec<User<'static>>> {
-        users::list(&*self.connection()?)
+    fn connection(&self) -> Result<PooledConnection> {
+        self.0.get().map(PooledConnection).chain_err(|| "Could not obtain pooled database connection")
     }
+}
 
-    pub fn add_user(&self, name: &str, password: &str) -> Result<()> {
-        users::add(&*self.connection()?, name, password)
-    }
+pub struct PooledConnection(R2d2PooledConnection<ConnectionManager<RawConnection>>);
 
-    pub fn auth_user(&self, name: &str, password: &str) -> Result<bool> {
-        users::authenticate(&*self.connection()?, name, password)
+impl Connection for PooledConnection {
+    fn raw(&self) -> &RawConnection {
+        &*self.0
     }
+}
+
+
+
+pub struct UnpooledDatabase(ConnectionManager<RawConnection>);
+
+impl UnpooledDatabase {
+    pub fn new(settings: &DatabaseSettings) -> Result<UnpooledDatabase> {
+        let manager = ConnectionManager::<RawConnection>::new(settings.url.clone());
+        run_migrations(&manager)?;
+        Ok(UnpooledDatabase(manager))
+    }
+}
+
+impl Database for UnpooledDatabase {
+    type Connection = UnpooledConnection;
+
+    fn connection(&self) -> Result<UnpooledConnection> {
+        self.0.connect().map(UnpooledConnection).chain_err(|| "Could not connect to database")
+    }
+}
+
+pub struct UnpooledConnection(RawConnection);
+
+impl Connection for UnpooledConnection {
+    fn raw(&self) -> &RawConnection {
+        &self.0
+    }
+}
+
+
+
+fn run_migrations(manager: &ConnectionManager<RawConnection>) -> Result<()> {
+    let connection = manager.connect().chain_err(|| "Could not connect to database")?;
+    embedded_migrations::run_with_output(&connection, &mut io::stderr())
+        .chain_err(|| "Could not run migrations")
 }
