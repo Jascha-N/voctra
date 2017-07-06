@@ -9,7 +9,8 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "build" do |build|
     build.vm.provider "virtualbox" do |vb|
-      vb.memory = 1024
+      vb.memory = 4096
+      vb.cpus = 4
     end
 
     build.vm.provision "shell" do |shell|
