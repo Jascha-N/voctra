@@ -16,15 +16,15 @@ base64 = "0.6"
 bcrypt = "0.1"
 chrono = "0.4"
 clap = "2"
-diesel = "0.13"
-diesel_codegen = "0.13"
+diesel = "0.14"
+diesel_codegen = "0.14"
 error-chain = "0.10"
 flate2 = "0.2"
 jsonwebtoken = "2"
 log = "0.3"
 log4rs = "0.7"
 r2d2 = "0.7"
-r2d2-diesel = "0.13"
+r2d2-diesel = "0.14"
 rand = "0.3"
 rocket = "0.2"
 rocket_codegen = "0.2"
@@ -41,7 +41,7 @@ nix = "0.8"
 users = "0.5"
 
 [build-dependencies]
-diesel = { version = "0.13", features = ["sqlite"] }
+diesel = { version = "0.14", features = ["sqlite"] }
 walkdir = "1"
 
 [profile.release]
