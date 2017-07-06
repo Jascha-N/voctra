@@ -1,3 +1,3 @@
 target/release/voctra usr/sbin/
-debian/conf/voctra.conf etc/voctra/
+debian/conf/voctra.toml etc/voctra/
 www/ /usr/share/voctra/
