@@ -32,3 +32,21 @@ impl<'r> Responder<'r> for Error {
         }
     }
 }
+
+#[macro_export]
+macro_rules! log_error {
+    ($result:expr) => {{
+        let result = $result;
+        if let Err(ref error) = result {
+            error!("{}", error);
+        }
+        result
+    }};
+    (target: $target:expr, $error:expr) => {{
+        let result = $result;
+        if let Err(ref error) = result {
+            error!(target: $target , "{}", error);
+        }
+        result
+    }};
+}

@@ -2,7 +2,7 @@
 #[macro_use] extern crate log;
 extern crate log4rs;
 #[macro_use] extern crate error_chain;
-extern crate voctra;
+#[macro_use] extern crate voctra;
 
 #[cfg(unix)] #[macro_use] extern crate chan;
 #[cfg(unix)] extern crate chan_signal;
@@ -276,17 +276,17 @@ fn run() -> Result<()> {
 
     if let Some(matches) = args.subcommand_matches("users") {
         if matches.subcommand_matches("list").is_some() {
-            voctra::list_users(settings)
+            log_error!(voctra::list_users(settings))
         } else if let Some(matches) = matches.subcommand_matches("add") {
             let username = matches.value_of("USERNAME").unwrap();
             let password = matches.value_of("PASSWORD").unwrap();
 
-            voctra::add_user(settings, username, password)
+            log_error!(voctra::add_user(settings, username, password))
         } else {
             unreachable!()
         }
     } else {
-        imp::run(settings, &args)
+        log_error!(imp::run(settings, &args))
     }
 }
 

@@ -4,17 +4,26 @@ set -e
 
 case "$1" in
     configure)
-        adduser --quiet --system --group --no-create-home --home /var/lib/voctra voctra
+        lib_dir="/var/lib/voctra"
+        db_dir="$lib_dir/db"
+        chmod 700 "$db_dir"
+        chown www-data "$db_dir"
 
+        log_dir="/var/log/voctra"
+        chown root:adm "$log_dir"
         if [ -z "$2" ]; then
-            # log="/var/log/voctra/voctra.log"
-            # if [ ! -e "$log" ]; then
-            #     touch "$log"
-            #     chmod 640 "$log"
-            #     chown voctra:adm "$log"
-            # fi
-
-            chown voctra:voctra "/var/lib/voctra"
+            voctra_log="$log_dir/voctra.log"
+            if [ ! -e "$voctra_log" ]; then
+                touch "$voctra_log"
+                chmod 640 "$voctra_log"
+                chown www-data:adm "$voctra_log"
+            fi
+            rocket_log="$log_dir/rocket.log"
+            if [ ! -e "$rocket_log" ]; then
+                touch "$rocket_log"
+                chmod 640 "$rocket_log"
+                chown www-data:adm "$rocket_log"
+            fi
         fi
         ;;
 
