@@ -39,13 +39,9 @@ macro_rules! log_error {
         let result = $result;
         if let Err(ref error) = result {
             error!("{}", error);
-        }
-        result
-    }};
-    (target: $target:expr, $error:expr) => {{
-        let result = $result;
-        if let Err(ref error) = result {
-            error!(target: $target , "{}", error);
+            for cause in error.iter().skip(1) {
+                error!(target: "<cause>", "{}", cause);
+            }
         }
         result
     }};

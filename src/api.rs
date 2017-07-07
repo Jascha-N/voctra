@@ -76,19 +76,17 @@ impl<'r> Responder<'r> for AuthResponse {
 #[post("/authenticate", data = "<user>")]
 fn authenticate(user: Form<AuthArgs>, db: State<PooledDatabase>, key: State<SecretKey>) -> Result<AuthResponse> {
     let user = user.into_inner();
-    if db.auth_user(&user.name, &user.password)? {
-        let exp = Utc::now() + Duration::days(7);
-        let claims = JwtClaims {
-            sub: user.name,
-            exp: exp.timestamp()
-        };
-        let jwt = jsonwebtoken::encode(&Header::new(Algorithm::HS256), &claims, &key[..])
-            .chain_err(|| "Could not create JWT")?;
+    db.auth_user(&user.name, &user.password)?;
 
-        Ok(AuthResponse { jwt: jwt })
-    } else {
-        Err(Error::from(ErrorKind::InvalidCredentials))
-    }
+    let exp = Utc::now() + Duration::days(7);
+    let claims = JwtClaims {
+        sub: user.name,
+        exp: exp.timestamp()
+    };
+    let jwt = jsonwebtoken::encode(&Header::new(Algorithm::HS256), &claims, &key[..])
+        .chain_err(|| "Could not create JWT")?;
+
+    Ok(AuthResponse { jwt: jwt })
 }
 
 pub fn routes() -> Vec<Route> {
