@@ -48,3 +48,8 @@ additive = false
 level = "info"
 appenders = ["rocket"]
 additive = false
+
+[logging.loggers.launch]
+level = "info"
+appenders = ["rocket"]
+additive = false

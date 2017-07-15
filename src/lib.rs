@@ -14,7 +14,8 @@ extern crate log4rs;
 extern crate r2d2;
 extern crate r2d2_diesel;
 extern crate rand;
-#[macro_use] extern crate rocket;
+extern crate rocket;
+extern crate rocket_contrib;
 extern crate serde;
 #[macro_use] extern crate serde_derive;
 extern crate serde_json;
@@ -22,18 +23,53 @@ extern crate toml;
 
 use db::{PooledDatabase, UnpooledDatabase, Users};
 use error::*;
-use rocket::config::Config as RocketConfig;
+use log::LogLevel;
+use rocket::{Config, Request, Response};
+use rocket::fairing::{Fairing, Kind, Info};
 use secret::SecretKey;
 use settings::Settings;
+use std::fmt::Write;
 
 pub mod error;
 pub mod settings;
 
 mod api;
 mod db;
-mod json;
 mod secret;
 #[path = "static.rs"] mod static_;
+
+struct Logger;
+
+impl Fairing for Logger {
+    fn info(&self) -> Info {
+        Info {
+            name: "logger",
+            kind: Kind::Response
+        }
+    }
+
+    // fn on_request(&self, request: &mut Request, data: &Data) {
+    //     info!(target: "requests", "{}", request);
+    // }
+
+    fn on_response(&self, request: &Request, response: &mut Response) {
+        if log_enabled!(LogLevel::Info) {
+            let mut message = String::new();
+            if let Some(remote_addr) = request.remote() {
+                write!(message, "{}", remote_addr).unwrap();
+            } else {
+                message.push_str("<?>");
+            }
+            write!(message, r#" "{} {}""#, request.method(), request.uri()).unwrap();
+            message.push_str(" => ");
+            write!(message, r#""{}""#, response.status()).unwrap();
+            if let Some(content_type) = response.content_type() {
+                write!(message, r#" "{}""#, content_type).unwrap();
+            }
+            info!(target: "voctra::access", "{}", message);
+        }
+    }
+}
 
 pub fn list_users(settings: Settings) -> Result<()> {
     let db = UnpooledDatabase::new(&settings.database)?;
@@ -52,7 +88,7 @@ pub fn add_user(settings: Settings, username: &str, password: &str) -> Result<()
 pub fn run(settings: Settings) -> Result<()> {
     let db = PooledDatabase::new(&settings.database)?;
 
-    let mut config = RocketConfig::new(settings.http.rocket_env).chain_err(|| "Could not create rocket configuration")?;
+    let mut config = Config::new(settings.http.rocket_env).chain_err(|| "Could not create rocket configuration")?;
     config.set_address(settings.http.address.clone()).chain_err(|| "Could not set server address")?;
     config.set_port(settings.http.port);
     if let Some(worker_threads) = settings.http.worker_threads {
@@ -66,13 +102,14 @@ pub fn run(settings: Settings) -> Result<()> {
         SecretKey::new()?
     };
 
-    rocket::custom(config, false)
-           .mount("/", static_::routes())
-           .mount("/api", api::routes())
-           .manage(db)
-           .manage(settings)
-           .manage(secret_key)
-           .launch();
+    let error = rocket::custom(config, false)
+                       .mount("/", static_::routes())
+                       .mount("/api", api::routes())
+                       .attach(Logger)
+                       .manage(db)
+                       .manage(settings)
+                       .manage(secret_key)
+                       .launch();
 
-    Ok(())
+    Err(error).chain_err(|| "Could not launch Rocket")
 }

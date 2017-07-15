@@ -37,8 +37,7 @@ pattern = "{d} {h({l})} {t} - {m}{n}"
 level = "info"
 appenders = ["stderr"]
 
-[logging.loggers.rocket]
-level = "off"
-
-[logging.loggers._]
-level = "off"
+[logging.loggers]
+rocket = { level = "off" }
+launch = { level = "off" }
+_ = { level = "off" }

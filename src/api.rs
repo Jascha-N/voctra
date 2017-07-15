@@ -3,15 +3,15 @@
 use db::{PooledDatabase, Users};
 use chrono::{Duration, Utc};
 use error::*;
-use json::Json;
 use jsonwebtoken::{self, Algorithm, Header};
 use rocket::{Route, State};
 use rocket::http::Status;
-use rocket::request::Form;
+use rocket::request::{Form, Request};
 use rocket::response::{Responder, Response};
+use rocket_contrib::Json;
 use secret::SecretKey;
 use serde::Serialize;
-use std::result::Result as StdResult;
+use std::result;
 
 #[derive(Serialize)]
 #[serde(untagged)]
@@ -45,8 +45,8 @@ impl ApiResponse<()> {
 }
 
 impl<'r, T: Serialize> Responder<'r> for ApiResponse<T> {
-    fn respond(self) -> StdResult<Response<'r>, Status> {
-        Json::new(self).respond()
+    fn respond_to(self, request: &Request) -> result::Result<Response<'r>, Status> {
+        Json(self).respond_to(request)
     }
 }
 
@@ -68,8 +68,8 @@ struct AuthResponse {
 }
 
 impl<'r> Responder<'r> for AuthResponse {
-    fn respond(self) -> StdResult<Response<'r>, Status> {
-        ApiResponse::ok(Some(self)).respond()
+    fn respond_to(self, request: &Request) -> result::Result<Response<'r>, Status> {
+        ApiResponse::ok(Some(self)).respond_to(request)
     }
 }
 

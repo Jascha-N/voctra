@@ -53,7 +53,7 @@ impl Database for PooledDatabase {
     type Connection = PooledConnection;
 
     fn connection(&self) -> Result<PooledConnection> {
-        self.0.get().map(PooledConnection).chain_err(|| "Could not obtain pooled database connection")
+        self.0.get().map(PooledConnection).chain_err(|| ErrorKind::DatabaseUnavailable)
     }
 }
 
@@ -81,7 +81,7 @@ impl Database for UnpooledDatabase {
     type Connection = UnpooledConnection;
 
     fn connection(&self) -> Result<UnpooledConnection> {
-        self.0.connect().map(UnpooledConnection).chain_err(|| "Could not connect to database")
+        self.0.connect().map(UnpooledConnection).chain_err(|| ErrorKind::DatabaseUnavailable)
     }
 }
 

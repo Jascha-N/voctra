@@ -49,6 +49,7 @@ impl Settings {
             Log4RsConfig::builder()
                          .appender(Appender::builder().build("stderr", Box::new(stderr)))
                          .logger(Logger::builder().build("rocket", LogLevelFilter::Off))
+                         .logger(Logger::builder().build("launch", LogLevelFilter::Off))
                          .logger(Logger::builder().build("_", LogLevelFilter::Off))
                          .build(Root::builder().appender("stderr").build(LogLevelFilter::Info))
                          .chain_err(|| "Could not create default logger configuration")

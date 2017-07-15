@@ -1,11 +1,16 @@
 use api::ApiResponse;
 use rocket::http::Status;
+use rocket::request::Request;
 use rocket::response::{Responder, Response};
 use rocket::response::status::Custom;
-use std::result::Result as StdResult;
+use std::result;
 
 error_chain! {
     errors {
+        DatabaseUnavailable {
+            display("Database access is unavailable at the moment")
+            description("database unavailable")
+        }
         InvalidCredentials {
             display("Invalid login credentials were supplied")
             description("invalid credentials")
@@ -18,16 +23,13 @@ error_chain! {
 }
 
 impl<'r> Responder<'r> for Error {
-    fn respond(self) -> StdResult<Response<'r>, Status> {
+    fn respond_to(self, request: &Request) -> result::Result<Response<'r>, Status> {
         match *self.kind() {
             ErrorKind::InvalidCredentials => {
                 let response = ApiResponse::err("authentication", &self);
-                Custom(Status::Unauthorized, response).respond()
+                Custom(Status::Unauthorized, response).respond_to(request)
             }
-            ErrorKind::UserAlreadyExists(..) => {
-                let response = ApiResponse::err("user-already-exists", &self);
-                Custom(Status::BadRequest, response).respond()
-            },
+            ErrorKind::DatabaseUnavailable => Err(Status::ServiceUnavailable),
             _ => Err(Status::InternalServerError)
         }
     }
