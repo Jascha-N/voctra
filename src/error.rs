@@ -24,6 +24,7 @@ error_chain! {
 
 impl<'r> Responder<'r> for Error {
     fn respond_to(self, request: &Request) -> result::Result<Response<'r>, Status> {
+        voctra_log!(self);
         match *self.kind() {
             ErrorKind::InvalidCredentials => {
                 let response = ApiResponse::err("authentication", &self);
@@ -33,18 +34,4 @@ impl<'r> Responder<'r> for Error {
             _ => Err(Status::InternalServerError)
         }
     }
-}
-
-#[macro_export]
-macro_rules! log_error {
-    ($result:expr) => {{
-        let result = $result;
-        if let Err(ref error) = result {
-            error!("{}", error);
-            for cause in error.iter().skip(1) {
-                error!(target: "<cause>", "{}", cause);
-            }
-        }
-        result
-    }};
 }

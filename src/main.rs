@@ -274,20 +274,22 @@ fn run() -> Result<()> {
 
     log4rs::init_config(settings.log4rs()?).chain_err(|| "Could not set up logger")?;
 
-    if let Some(matches) = args.subcommand_matches("users") {
+    let result = if let Some(matches) = args.subcommand_matches("users") {
         if matches.subcommand_matches("list").is_some() {
-            log_error!(voctra::list_users(settings))
+            voctra::list_users(settings)
         } else if let Some(matches) = matches.subcommand_matches("add") {
             let username = matches.value_of("USERNAME").unwrap();
             let password = matches.value_of("PASSWORD").unwrap();
 
-            log_error!(voctra::add_user(settings, username, password))
+            voctra::add_user(settings, username, password)
         } else {
             unreachable!()
         }
     } else {
-        log_error!(imp::run(settings, &args))
-    }
+        imp::run(settings, &args)
+    };
+    voctra_log!(result);
+    result
 }
 
 quick_main!(run);

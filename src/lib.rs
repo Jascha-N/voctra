@@ -23,12 +23,12 @@ extern crate toml;
 
 use db::{PooledDatabase, UnpooledDatabase, Users};
 use error::*;
-use log::LogLevel;
-use rocket::{Config, Request, Response};
-use rocket::fairing::{Fairing, Kind, Info};
+use logging::AccessLogger;
+use rocket::Config;
 use secret::SecretKey;
 use settings::Settings;
-use std::fmt::Write;
+
+#[macro_use] mod logging;
 
 pub mod error;
 pub mod settings;
@@ -37,39 +37,6 @@ mod api;
 mod db;
 mod secret;
 #[path = "static.rs"] mod static_;
-
-struct Logger;
-
-impl Fairing for Logger {
-    fn info(&self) -> Info {
-        Info {
-            name: "logger",
-            kind: Kind::Response
-        }
-    }
-
-    // fn on_request(&self, request: &mut Request, data: &Data) {
-    //     info!(target: "requests", "{}", request);
-    // }
-
-    fn on_response(&self, request: &Request, response: &mut Response) {
-        if log_enabled!(LogLevel::Info) {
-            let mut message = String::new();
-            if let Some(remote_addr) = request.remote() {
-                write!(message, "{}", remote_addr).unwrap();
-            } else {
-                message.push_str("<?>");
-            }
-            write!(message, r#" "{} {}""#, request.method(), request.uri()).unwrap();
-            message.push_str(" => ");
-            write!(message, r#""{}""#, response.status()).unwrap();
-            if let Some(content_type) = response.content_type() {
-                write!(message, r#" "{}""#, content_type).unwrap();
-            }
-            info!(target: "voctra::access", "{}", message);
-        }
-    }
-}
 
 pub fn list_users(settings: Settings) -> Result<()> {
     let db = UnpooledDatabase::new(&settings.database)?;
@@ -105,7 +72,7 @@ pub fn run(settings: Settings) -> Result<()> {
     let error = rocket::custom(config, false)
                        .mount("/", static_::routes())
                        .mount("/api", api::routes())
-                       .attach(Logger)
+                       .attach(AccessLogger)
                        .manage(db)
                        .manage(settings)
                        .manage(secret_key)
